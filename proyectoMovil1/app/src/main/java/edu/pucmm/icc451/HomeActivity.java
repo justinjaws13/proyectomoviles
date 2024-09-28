@@ -2,6 +2,7 @@ package edu.pucmm.icc451;
 
 import android.os.Bundle;
 import android.widget.TextView;
+import android.content.Intent;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -33,7 +34,7 @@ public class HomeActivity extends AppCompatActivity {
         // Setup
         Bundle bundle = getIntent().getExtras();
         String email = bundle != null ? bundle.getString("email") : null;
-        String provider = bundle != null ? bundle.getString("provider") : null;
+        String provider = bundle != null ? bundle.getString("provider_name") : null;
 
         setup(email != null ? email : "", provider != null ? provider : "");
     }
@@ -48,7 +49,10 @@ public class HomeActivity extends AppCompatActivity {
 
         findViewById(R.id.cerrarSesionButton).setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();
-            onBackPressed();
+            Intent intent = new Intent(HomeActivity.this, AuthActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            finish();  // Cierra la actividad actual
         });
     }
 }

@@ -65,12 +65,15 @@ public class AuthActivity extends AppCompatActivity {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful()) {
-                                showHome(task.getResult().getUser().getEmail() != null ? task.getResult().getUser().getEmail() : "", ProviderType.BASIC, AuthActivity.this);
+                                String email = task.getResult().getUser().getEmail();
+                                showHome(email != null ? email : "", ProviderType.BASIC, AuthActivity.this);
                             } else {
-                                showAlert();
+                                showAlert(task.getException() != null ? task.getException().getMessage() : "Error desconocido");
                             }
                         }
                     });
+                } else {
+                    showAlert("Los campos de email y contraseña no pueden estar vacíos.");
                 }
             }
         });
@@ -81,7 +84,7 @@ public class AuthActivity extends AppCompatActivity {
                 if (!emailEditText.getText().toString().isEmpty() && !passwordEditText.getText().toString().isEmpty()) {
                     signInWithEmailAndPass(emailEditText.getText().toString(), passwordEditText.getText().toString());
                 } else {
-                    showAlert();
+                    showAlert("Los campos de email y contraseña no pueden estar vacíos.");
                 }
             }
         });
@@ -93,18 +96,19 @@ public class AuthActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            showHome(task.getResult().getUser().getEmail() != null ? task.getResult().getUser().getEmail() : "", ProviderType.BASIC, AuthActivity.this);
+                            String email = task.getResult().getUser().getEmail();
+                            showHome(email != null ? email : "", ProviderType.BASIC, AuthActivity.this);
                         } else {
-                            showAlert();
+                            showAlert(task.getException() != null ? task.getException().getMessage() : "Error desconocido");
                         }
                     }
                 });
     }
 
-    private void showAlert() {
+    private void showAlert(String message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Error");
-        builder.setMessage("Se ha producido un error autenticando al usuario");
+        builder.setMessage(message);
         builder.setPositiveButton("Aceptar", null);
 
         AlertDialog dialog = builder.create();
@@ -113,7 +117,9 @@ public class AuthActivity extends AppCompatActivity {
 
     private void showHome(String email, ProviderType provider, Context context) {
         Intent homeIntent = new Intent(context, HomeActivity.class);
+        homeIntent.putExtra("email", email);
         homeIntent.putExtra("provider_name", provider.name());
         context.startActivity(homeIntent);
+        finish();  // Para que el usuario no vuelva a la pantalla de login con el botón de atrás
     }
 }
