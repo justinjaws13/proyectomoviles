@@ -1,125 +1,91 @@
 package edu.pucmm.icc451;
 
-import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
+import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import android.app.AlertDialog;
-import android.content.Context;
-import android.content.Intent;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.auth.AuthResult;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
+import edu.pucmm.icc451.databinding.ActivityAuthBinding;
 
 public class AuthActivity extends AppCompatActivity {
 
     private FirebaseAuth auth;
-    private Button registrarButton, cerrarSesionButton, loginButton;
-    private EditText emailEditText, passwordEditText;
+    private ActivityAuthBinding binding;
 
-    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        FirebaseApp.initializeApp(this);
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_auth);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
 
+        // Usar ViewBinding
+        binding = ActivityAuthBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        // Inicializar FirebaseAuth
         auth = FirebaseAuth.getInstance();
-        registrarButton = findViewById(R.id.registrarButton);
-        cerrarSesionButton = findViewById(R.id.cerrarSesionButton);
-        loginButton = findViewById(R.id.loginButton);
-        emailEditText = findViewById(R.id.emailEditText);
-        passwordEditText = findViewById(R.id.passwordEditText);
 
+        // Configurar eventos de botones
         setup();
     }
 
+    // Configurar los botones de login y registro
     private void setup() {
-        setTitle("Autenticación");
-
-        registrarButton.setOnClickListener(new View.OnClickListener() {
+        binding.loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!emailEditText.getText().toString().isEmpty() && !passwordEditText.getText().toString().isEmpty()) {
-                    auth.createUserWithEmailAndPassword(
-                            emailEditText.getText().toString(),
-                            passwordEditText.getText().toString()
-                    ).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (task.isSuccessful()) {
-                                String email = task.getResult().getUser().getEmail();
-                                showHome(email != null ? email : "", ProviderType.BASIC, AuthActivity.this);
-                            } else {
-                                showAlert(task.getException() != null ? task.getException().getMessage() : "Error desconocido");
-                            }
-                        }
-                    });
+                String email = binding.emailEditText.getText().toString();
+                String password = binding.passwordEditText.getText().toString();
+
+                if (!email.isEmpty() && !password.isEmpty()) {
+                    auth.signInWithEmailAndPassword(email, password)
+                            .addOnCompleteListener(task -> {
+                                if (task.isSuccessful()) {
+                                    FirebaseUser user = auth.getCurrentUser();
+                                    // Inicio de sesión exitoso, dirigir a la siguiente actividad
+                                    if (user != null) {
+                                        goToHomeActivity();
+                                    }
+                                } else {
+                                    showSnackbar("Error de autenticación: " + task.getException().getMessage());
+                                }
+                            });
                 } else {
-                    showAlert("Los campos de email y contraseña no pueden estar vacíos.");
+                    showSnackbar("Por favor ingrese ambos campos.");
                 }
             }
         });
 
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!emailEditText.getText().toString().isEmpty() && !passwordEditText.getText().toString().isEmpty()) {
-                    signInWithEmailAndPass(emailEditText.getText().toString(), passwordEditText.getText().toString());
-                } else {
-                    showAlert("Los campos de email y contraseña no pueden estar vacíos.");
-                }
-            }
+        // Ir a la pantalla de registro
+        binding.registrarButton.setOnClickListener(v -> {
+            Intent intent = new Intent(AuthActivity.this, RegistrarActivity.class);
+            startActivity(intent);
         });
     }
 
-    private void signInWithEmailAndPass(String email, String pass) {
-        auth.signInWithEmailAndPassword(email, pass)
-                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            String email = task.getResult().getUser().getEmail();
-                            showHome(email != null ? email : "", ProviderType.BASIC, AuthActivity.this);
-                        } else {
-                            showAlert(task.getException() != null ? task.getException().getMessage() : "Error desconocido");
-                        }
-                    }
-                });
+    // Método para navegar a la actividad principal después del login
+    private void goToHomeActivity() {
+        Intent intent = new Intent(this, HomeActivity.class); // Suponiendo que tienes una HomeActivity
+        startActivity(intent);
+        finish(); // Cerrar la actividad actual
     }
 
-    private void showAlert(String message) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Error");
-        builder.setMessage(message);
-        builder.setPositiveButton("Aceptar", null);
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
+    // Método para mostrar mensajes
+    private void showSnackbar(String message) {
+        Snackbar.make(binding.getRoot(), message, Snackbar.LENGTH_LONG).show();
     }
 
-    private void showHome(String email, ProviderType provider, Context context) {
-        Intent homeIntent = new Intent(context, HomeActivity.class);
-        homeIntent.putExtra("email", email);
-        homeIntent.putExtra("provider_name", provider.name());
-        context.startActivity(homeIntent);
-        finish();  // Para que el usuario no vuelva a la pantalla de login con el botón de atrás
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FirebaseUser currentUser = auth.getCurrentUser();
+        if (currentUser != null) {
+            // Si el usuario ya ha iniciado sesión, ir directamente a HomeActivity
+            goToHomeActivity();
+        }
     }
 }
