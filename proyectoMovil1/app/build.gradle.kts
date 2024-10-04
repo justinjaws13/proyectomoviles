@@ -44,6 +44,8 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-analytics")
+    implementation(platform("com.google.firebase:firebase-bom:32.8.0"))
+    implementation("com.google.firebase:firebase-database")
     implementation ("com.google.firebase:firebase-auth:latest-version")
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
