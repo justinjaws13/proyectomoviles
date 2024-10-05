@@ -2,11 +2,18 @@ package edu.pucmm.icc451;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 
 import edu.pucmm.icc451.databinding.ActivityRegistrarBinding;
 
@@ -14,6 +21,7 @@ public class RegistrarActivity extends AppCompatActivity {
 
     private ActivityRegistrarBinding binding;
     private FirebaseAuth auth;
+    private FirebaseFirestore db; // Firebase Firestore
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +33,7 @@ public class RegistrarActivity extends AppCompatActivity {
 
         // Inicializar Firebase Auth
         auth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
 
         setSupportActionBar(binding.toolbar);
 
@@ -44,6 +53,17 @@ public class RegistrarActivity extends AppCompatActivity {
                 auth.createUserWithEmailAndPassword(email, password)
                         .addOnCompleteListener(task -> {
                             if (task.isSuccessful()) {
+                                // Guardar el usuario en Firestore
+                                String userId = Objects.requireNonNull(auth.getCurrentUser()).getUid();
+
+                                Map<String, Object> userMap = new HashMap<>();
+                                userMap.put("userId", userId);
+                                userMap.put("email", email);
+
+                                db.collection("users").document(userId).set(userMap)
+                                        .addOnSuccessListener(aVoid -> Log.d("RegistrarActivity", "Usuario agregado a Firestore"))
+                                        .addOnFailureListener(e -> Log.w("RegistrarActivity", "Error al agregar usuario", e));
+
                                 // Registro exitoso, ir al login
                                 Intent loginIntent = new Intent(RegistrarActivity.this, AuthActivity.class);
                                 startActivity(loginIntent);
