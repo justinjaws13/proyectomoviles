@@ -85,6 +85,7 @@
         android:orientation="vertical"
         android:overScrollMode="never"
         android:padding="20dp"
+        android:visibility="gone"
         app:stackFromEnd="true"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toBottomOf="@+id/viewBackground"
@@ -139,6 +140,19 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/layoutSend"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/textAvailability"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/mint_green"
+        android:padding="2dp"
+        android:text="@string/online"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textSize="11sp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@+id/viewSupporter"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -4,88 +4,8 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f62d285c-bbdb-4ce4-b98d-cb8fd301c7b1" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/ChatApp/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/.idea/appInsightsSettings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/.idea/compiler.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/.idea/deploymentTargetSelector.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/.idea/gradle.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/.idea/migrations.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/build.gradle.kts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/google-services.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/proguard-rules.pro" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/androidTest/java/com/pucmm/chatapp/ExampleInstrumentedTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/AndroidManifest.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/activities/ChatActivity.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/activities/MainActivity.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/activities/SignInActivity.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/activities/SignUpActivity.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/activities/UsersActivity.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/adapters/ChatAdapter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/adapters/UsersAdapter.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/firebase/MessagingService.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/listeners/UserListener.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/models/ChatMessage.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/models/User.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/utilities/Constants.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/utilities/PreferenceManager.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/background_chat_input.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/background_content_bottom.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/background_content_top.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/background_icon.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/background_image.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/background_input.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/background_recieved_message.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/background_sent_message.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/ic_add.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/ic_back.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/ic_info.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/ic_launcher_background.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/ic_logout.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/ic_send.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/layout/activity_chat.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/layout/activity_main.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/layout/activity_sign_in.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/layout/activity_sign_up.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/layout/activity_users.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/layout/item_contaier_sent_message.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/layout/item_container_received_message.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/layout/item_container_user.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/mipmap-hdpi/ic_launcher.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/mipmap-hdpi/ic_launcher_round.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/mipmap-mdpi/ic_launcher.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/mipmap-mdpi/ic_launcher_round.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/mipmap-xhdpi/ic_launcher.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/mipmap-xxhdpi/ic_launcher.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/values-night/themes.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/values/colors.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/values/strings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/values/themes.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/xml/backup_rules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/xml/data_extraction_rules.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/test/java/com/pucmm/chatapp/ExampleUnitTest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/build.gradle.kts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/gradle.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/gradle/libs.versions.toml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/gradle/wrapper/gradle-wrapper.jar" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/gradlew" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/gradlew.bat" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ChatApp/settings.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="f62d285c-bbdb-4ce4-b98d-cb8fd301c7b1" name="Changes" comment="Nuevo proyecto en el que usando de base el anterior con respecto al login y sign in, y se agrego la funcionalidad de poder enviar mensajes en tiempo real, existe un problema al iniciar sesion porque se cierra la aplicacion, sin embargo al registrarte puedes usarla sin ningun problema, revisar eso. &#10;&#10;faltan las notificaciones y el poder enviar imagenes">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/proyectoMovil1/app/src/main/res/layout/activity_home.xml" beforeDir="false" afterPath="$PROJECT_DIR$/proyectoMovil1/app/src/main/res/layout/activity_home.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -168,6 +88,19 @@
       <option name="presentableId" value="Default" />
       <updated>1727303559915</updated>
     </task>
+    <task id="LOCAL-00001" summary="Nuevo proyecto en el que usando de base el anterior con respecto al login y sign in, y se agrego la funcionalidad de poder enviar mensajes en tiempo real, existe un problema al iniciar sesion porque se cierra la aplicacion, sin embargo al registrarte puedes usarla sin ningun problema, revisar eso. &#10;&#10;faltan las notificaciones y el poder enviar imagenes">
+      <option name="closed" value="true" />
+      <created>1728275436478</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1728275436478</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Nuevo proyecto en el que usando de base el anterior con respecto al login y sign in, y se agrego la funcionalidad de poder enviar mensajes en tiempo real, existe un problema al iniciar sesion porque se cierra la aplicacion, sin embargo al registrarte puedes usarla sin ningun problema, revisar eso. &#10;&#10;faltan las notificaciones y el poder enviar imagenes" />
+    <option name="LAST_COMMIT_MESSAGE" value="Nuevo proyecto en el que usando de base el anterior con respecto al login y sign in, y se agrego la funcionalidad de poder enviar mensajes en tiempo real, existe un problema al iniciar sesion porque se cierra la aplicacion, sin embargo al registrarte puedes usarla sin ningun problema, revisar eso. &#10;&#10;faltan las notificaciones y el poder enviar imagenes" />
   </component>
 </project>
