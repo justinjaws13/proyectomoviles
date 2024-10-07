@@ -48,6 +48,9 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.firebase.messaging)
     implementation(libs.firebase.firestore)
+    implementation ("com.google.android.gms:play-services-auth:20.4.1")
+    implementation ("com.google.android.gms:play-services-basement:18.1.0")
+
 //    implementation(libs.constraintlayout)
 //
     testImplementation(libs.junit)
