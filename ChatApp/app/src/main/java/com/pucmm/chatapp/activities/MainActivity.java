@@ -31,32 +31,59 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         preferenceManager = new PreferenceManager(getApplicationContext());
-        loadUserDetails();
-        getToken();
-        setListeners();
+        loadUserDetails();  // Cargar detalles del usuario
+        getToken();         // Obtener token de Firebase
+        setListeners();     // Definir listeners de botones
     }
 
     private void setListeners(){
-        binding.imageSignOut.setOnClickListener(v -> signOut());
+        binding.imageSignOut.setOnClickListener(v -> signOut());  // Acciones de logout
         binding.fabNewChat.setOnClickListener(v ->
-                startActivity(new Intent(getApplicationContext(), UsersActivity.class)));
+                startActivity(new Intent(getApplicationContext(), UsersActivity.class)));  // Ir a nueva actividad
     }
 
+    /**
+     * Carga el nombre de usuario y la imagen de perfil guardada en las preferencias
+     */
     private void loadUserDetails(){
         binding.textUsername.setText(preferenceManager.getString(Constants.KEY_USERNAME));
-        byte[] bytes = Base64.decode(preferenceManager.getString(Constants.KEY_IMAGE), Base64.DEFAULT);
-        Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-        binding.imageProfile.setImageBitmap(bitmap);
+
+        // Manejo seguro de la imagen en caso de que no esté disponible
+        String encodedImage = preferenceManager.getString(Constants.KEY_IMAGE);
+
+        if (encodedImage != null && !encodedImage.isEmpty()) {
+            try {
+                byte[] bytes = Base64.decode(encodedImage, Base64.DEFAULT);
+                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                binding.imageProfile.setImageBitmap(bitmap);
+            } catch (IllegalArgumentException e) {
+                // Error al decodificar la imagen
+                showToast("Error al cargar la imagen de perfil.");
+                e.printStackTrace();
+            }
+        } else {
+            // En caso de que la imagen sea nula o vacía, cargar una imagen predeterminada
+            //binding.imageProfile.setImageResource(R.drawable.default_profile_image);
+        }
     }
 
+    /**
+     * Muestra un Toast con el mensaje proporcionado
+     */
     private void showToast(String message){
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Obtiene el token de Firebase para mensajes push y lo actualiza en Firestore
+     */
     private void getToken(){
         FirebaseMessaging.getInstance().getToken().addOnSuccessListener(this::updateToken);
     }
 
+    /**
+     * Actualiza el token FCM en Firestore
+     */
     private void updateToken(String token){
         FirebaseFirestore database = FirebaseFirestore.getInstance();
         DocumentReference documentReference =
@@ -66,6 +93,10 @@ public class MainActivity extends AppCompatActivity {
         documentReference.update(Constants.KEY_FCM_TOKEN, token)
                 .addOnFailureListener(e -> showToast("Unable to update token"));
     }
+
+    /**
+     * Cierra sesión del usuario, elimina el token FCM y borra las preferencias
+     */
     private void signOut(){
         showToast("Cerrando sesión...");
         FirebaseFirestore database = FirebaseFirestore.getInstance();
