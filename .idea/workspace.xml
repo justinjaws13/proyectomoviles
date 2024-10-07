@@ -5,8 +5,87 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f62d285c-bbdb-4ce4-b98d-cb8fd301c7b1" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gradle/config.properties" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/config.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/.idea/appInsightsSettings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/.idea/compiler.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/.idea/deploymentTargetSelector.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/.idea/gradle.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/.idea/migrations.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/build.gradle.kts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/google-services.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/proguard-rules.pro" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/androidTest/java/com/pucmm/chatapp/ExampleInstrumentedTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/AndroidManifest.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/activities/ChatActivity.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/activities/MainActivity.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/activities/SignInActivity.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/activities/SignUpActivity.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/activities/UsersActivity.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/adapters/ChatAdapter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/adapters/UsersAdapter.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/firebase/MessagingService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/listeners/UserListener.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/models/ChatMessage.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/models/User.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/utilities/Constants.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/java/com/pucmm/chatapp/utilities/PreferenceManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/background_chat_input.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/background_content_bottom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/background_content_top.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/background_icon.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/background_image.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/background_input.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/background_recieved_message.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/background_sent_message.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/ic_add.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/ic_back.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/ic_info.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/ic_launcher_background.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/ic_logout.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/drawable/ic_send.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/layout/activity_chat.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/layout/activity_main.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/layout/activity_sign_in.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/layout/activity_sign_up.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/layout/activity_users.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/layout/item_contaier_sent_message.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/layout/item_container_received_message.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/layout/item_container_user.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/mipmap-hdpi/ic_launcher.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/mipmap-hdpi/ic_launcher_round.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/mipmap-mdpi/ic_launcher.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/mipmap-mdpi/ic_launcher_round.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/mipmap-xhdpi/ic_launcher.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/mipmap-xhdpi/ic_launcher_round.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/mipmap-xxhdpi/ic_launcher.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/mipmap-xxhdpi/ic_launcher_round.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/mipmap-xxxhdpi/ic_launcher.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/mipmap-xxxhdpi/ic_launcher_round.webp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/values-night/themes.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/values/colors.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/values/strings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/values/themes.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/xml/backup_rules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/main/res/xml/data_extraction_rules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/app/src/test/java/com/pucmm/chatapp/ExampleUnitTest.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/build.gradle.kts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/gradle.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/gradle/libs.versions.toml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/gradle/wrapper/gradle-wrapper.jar" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/gradlew" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/gradlew.bat" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ChatApp/settings.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/proyectoMovil1/app/src/main/res/layout/activity_home.xml" beforeDir="false" afterPath="$PROJECT_DIR$/proyectoMovil1/app/src/main/res/layout/activity_home.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -15,6 +94,23 @@
   </component>
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
+  </component>
+  <component name="ExternalProjectsManager">
+    <system id="GRADLE">
+      <state>
+        <projects_view>
+          <tree_state>
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="proyectoMovil1" type="f1a62948:ProjectNode" />
+              </path>
+            </expand>
+            <select />
+          </tree_state>
+        </projects_view>
+      </state>
+    </system>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -25,12 +121,12 @@
     &quot;assignee&quot;: &quot;justinjaws13&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/justinjaws13/proyectomoviles.git",
-    "accountId": "c53ae91a-31dd-4863-bfc5-201a7373b540"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/justinjaws13/proyectomoviles.git&quot;,
+    &quot;accountId&quot;: &quot;c53ae91a-31dd-4863-bfc5-201a7373b540&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
   &quot;associatedIndex&quot;: 6
@@ -54,10 +150,15 @@
     "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Coshita/AndroidStudioProjects/proyectomoviles/proyectoMovil1",
+    "last_opened_file_path": "C:/Users/Coshita/AndroidStudioProjects/proyectomoviles",
     "show.migrate.to.gradle.popup": "false"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\Coshita\AndroidStudioProjects\proyectomoviles" />
+    </key>
+  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">

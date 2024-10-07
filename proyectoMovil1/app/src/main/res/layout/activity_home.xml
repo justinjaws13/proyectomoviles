@@ -67,12 +67,12 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/usuariosRecyclerView"
-        android:layout_width="375dp"
-        android:layout_height="530dp"
+        android:layout_width="367dp"
+        android:layout_height="546dp"
         android:layout_margin="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cerrarSesionButton"/>
+        app:layout_constraintTop_toBottomOf="@+id/cerrarSesionButton" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
