@@ -13,4 +13,5 @@
     <string name="seleccionar_usuario">Seleccionar Usuario</string>
     <string name="escribe_tu_mensaje">Escribe tu mensaje...</string>
     <string name="online">Online</string>
+    <string name="imagen">imagen</string>
 </resources>

@@ -19,26 +19,28 @@ import java.util.List;
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final List<ChatMessage> chatMessages;
-    private Bitmap receiverProfileImage;
+//    private  Bitmap recieverProfileImage;
     private final String senderId;
 
     public static final int VIEW_TYPE_SENT = 1;
-    public static final int VIEW_TYPE_RECEIVED = 2;
+    public static final int VIEW_TYPE_RECIEVED = 2;
 
-    public void setReceiverProfileImage(Bitmap bitmap) {
-        receiverProfileImage = bitmap;
-    }
+//    public void setRecieverProfileImage(Bitmap bitmap){
+//        recieverProfileImage = bitmap;
+//    }
 
-    public ChatAdapter(List<ChatMessage> chatMessages, Bitmap receiverProfileImage, String senderId) {
+    public ChatAdapter(List<ChatMessage> chatMessages,
+//                       Bitmap recieverProfileImage,
+                       String senderId) {
         this.chatMessages = chatMessages;
-        this.receiverProfileImage = receiverProfileImage;
+//        this.recieverProfileImage = recieverProfileImage;
         this.senderId = senderId;
     }
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        if (viewType == VIEW_TYPE_SENT) {
+        if(viewType == VIEW_TYPE_SENT){
             return new SentMessageViewHolder(
                     ItemContaierSentMessageBinding.inflate(
                             LayoutInflater.from(parent.getContext()),
@@ -46,24 +48,26 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                             false
                     )
             );
-        } else {
-            return new ReceivedMessageViewHolder(
+        }else{
+            return new RecievedMessageViewHolder(
                     ItemContainerReceivedMessageBinding.inflate(
                             LayoutInflater.from(parent.getContext()),
                             parent,
                             false
                     )
             );
+
         }
     }
 
+
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        if (getItemViewType(position) == VIEW_TYPE_SENT) {
-            ((SentMessageViewHolder) holder).setData(chatMessages.get(position));
-        } else {
-            ((ReceivedMessageViewHolder) holder).setData(chatMessages.get(position), receiverProfileImage);
-        }
+         if(getItemViewType(position) == VIEW_TYPE_SENT){
+             ((SentMessageViewHolder) holder).setData(chatMessages.get(position));
+         }else{
+             ((RecievedMessageViewHolder) holder).setData(chatMessages.get(position)); //recieverProfileImage
+         }
     }
 
     @Override
@@ -71,70 +75,77 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return chatMessages.size();
     }
 
-    @Override
-    public int getItemViewType(int position) {
-        if (chatMessages.get(position).senderId.equals(senderId)) {
+    public int getItemViewType(int position){
+        if(chatMessages.get(position).senderId.equals(senderId)){
             return VIEW_TYPE_SENT;
-        } else {
-            return VIEW_TYPE_RECEIVED;
+        }else{
+            return VIEW_TYPE_RECIEVED;
         }
     }
 
-    static class SentMessageViewHolder extends RecyclerView.ViewHolder {
+
+    static  class  SentMessageViewHolder extends RecyclerView.ViewHolder{
         private final ItemContaierSentMessageBinding binding;
 
-        SentMessageViewHolder(ItemContaierSentMessageBinding itemContaierSentMessageBinding) {
+        SentMessageViewHolder(ItemContaierSentMessageBinding itemContaierSentMessageBinding){
             super(itemContaierSentMessageBinding.getRoot());
             binding = itemContaierSentMessageBinding;
         }
 
-        void setData(ChatMessage chatMessage) {
-            if (chatMessage.message != null && !chatMessage.message.isEmpty()) {
-                // Mostrar mensaje de texto
+        void setData(ChatMessage chatMessage){
+            if(chatMessage.message != null && !chatMessage.message.isEmpty()) {
+                binding.textMessage.setText(chatMessage.message);
+                binding.textDateTime.setText(chatMessage.dateTime);
                 binding.textMessage.setVisibility(View.VISIBLE);
                 binding.imageMessage.setVisibility(View.GONE);
-                binding.textMessage.setText(chatMessage.message);
-            } else if (chatMessage.image != null) {
-                // Mostrar imagen
-                binding.textMessage.setVisibility(View.GONE);
+            } else if (chatMessage.image != null && !chatMessage.image.isEmpty()) {
+                binding.imageMessage.setImageBitmap(getBitmapFromEncodedString(chatMessage.image));
                 binding.imageMessage.setVisibility(View.VISIBLE);
-                binding.imageMessage.setImageBitmap(ChatAdapter.getBitmapFromEncodedString(chatMessage.image));
+                binding.textMessage.setVisibility(View.GONE);
             }
             binding.textDateTime.setText(chatMessage.dateTime);
         }
+
+        // Método para decodificar la imagen en formato Base64
+        private Bitmap getBitmapFromEncodedString(String encodedImage) {
+            byte[] bytes = Base64.decode(encodedImage, Base64.DEFAULT);
+            return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+        }
     }
 
-    static class ReceivedMessageViewHolder extends RecyclerView.ViewHolder {
+    static class RecievedMessageViewHolder extends RecyclerView.ViewHolder{
+
         private final ItemContainerReceivedMessageBinding binding;
 
-        ReceivedMessageViewHolder(ItemContainerReceivedMessageBinding itemContainerReceivedMessageBinding) {
+        RecievedMessageViewHolder(ItemContainerReceivedMessageBinding itemContainerReceivedMessageBinding){
             super(itemContainerReceivedMessageBinding.getRoot());
             binding = itemContainerReceivedMessageBinding;
         }
 
-        void setData(ChatMessage chatMessage, Bitmap receiverProfileImage) {
-            if (chatMessage.message != null && !chatMessage.message.isEmpty()) {
-                // Mostrar mensaje de texto
-                binding.textMessage.setVisibility(View.VISIBLE);
-                binding.imageMessage.setVisibility(View.GONE);
-                binding.textMessage.setText(chatMessage.message);
-            } else if (chatMessage.image != null) {
-                // Mostrar imagen
-                binding.textMessage.setVisibility(View.GONE);
-                binding.imageMessage.setVisibility(View.VISIBLE);
-                binding.imageMessage.setImageBitmap(ChatAdapter.getBitmapFromEncodedString(chatMessage.image));
-            }
+        void setData(ChatMessage chatMessage ){  //,Bitmap receiverProfileImage
+           if(chatMessage.message != null && !chatMessage.message.isEmpty()) {
+               binding.textMessage.setText(chatMessage.message);
+               binding.textDateTime.setText(chatMessage.dateTime);
+               binding.textMessage.setVisibility(View.VISIBLE);
+               binding.imageMessage.setVisibility(View.GONE);
+           } else if (chatMessage.image != null && !chatMessage.image.isEmpty()) {
+               binding.imageMessage.setImageBitmap(getBitmapFromEncodedString(chatMessage.image));
+               binding.imageMessage.setVisibility(View.VISIBLE);
+               binding.textMessage.setVisibility(View.GONE);
+           }
             binding.textDateTime.setText(chatMessage.dateTime);
 
-            // Mostrar imagen de perfil del receptor si está disponible
-            if (receiverProfileImage != null) {
-                binding.imageProfile.setImageBitmap(receiverProfileImage);
-            }
+//            if(receiverProfileImage != null) {
+//                binding.imageProfile.setImageBitmap(receiverProfileImage);
+//            }
+
+        }
+
+        // Decodificar imagen Base64 a Bitmap
+        private Bitmap getBitmapFromEncodedString(String encodedImage) {
+            byte[] bytes = Base64.decode(encodedImage, Base64.DEFAULT);
+            return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
         }
     }
 
-    public static Bitmap getBitmapFromEncodedString(String encodedImage) {
-        byte[] bytes = Base64.decode(encodedImage, Base64.DEFAULT);
-        return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-    }
 }

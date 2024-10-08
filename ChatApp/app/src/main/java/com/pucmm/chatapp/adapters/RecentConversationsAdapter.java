@@ -58,23 +58,23 @@ public class RecentConversationsAdapter extends RecyclerView.Adapter<RecentConve
          binding = itemContainerRecentConversationBinding;
         }
     void setData(ChatMessage chatMessage){
-            binding.imageProfile.setImageBitmap(getConversionImage(chatMessage.conversionImage));
+//            binding.imageProfile.setImageBitmap(getConversionImage(chatMessage.conversionImage));
             binding.textUsername.setText(chatMessage.conversionUsername);
             binding.textRecentMessage.setText(chatMessage.message);
             binding.getRoot().setOnClickListener(v -> {
                 User user = new User();
                 user.id = chatMessage.conversionId;
                 user.username = chatMessage.conversionUsername;
-                user.image = chatMessage.conversionImage;
+//                user.image = chatMessage.conversionImage;
                 conversionListener.onConversionClicked(user);
             });
     }
 
     }
 
-    private Bitmap getConversionImage(String encodedImage){
-        byte[] bytes = Base64.decode(encodedImage, Base64.DEFAULT);
-        return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-    }
+//    private Bitmap getConversionImage(String encodedImage){
+//        byte[] bytes = Base64.decode(encodedImage, Base64.DEFAULT);
+//        return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+//    }
 
 }

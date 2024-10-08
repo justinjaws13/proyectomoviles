@@ -7,14 +7,10 @@ import android.os.Bundle;
 import android.util.Base64;
 import android.view.View;
 import android.widget.Toast;
-import com.google.firebase.firestore.DocumentReference;
 
-
-
-
-import androidx.annotation.NonNull;
 
 import com.google.firebase.firestore.DocumentChange;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -48,42 +44,60 @@ public class MainActivity extends BaseActivity implements ConversionListener {
         setContentView(binding.getRoot());
         preferenceManager = new PreferenceManager(getApplicationContext());
         init();
-        loadUserDetails();
-        getToken();
-        setListeners();
+        loadUserDetails();  // Cargar detalles del usuario
+        getToken();         // Obtener token de Firebase
+        setListeners();     // Definir listeners de botones
         listenConversations();
     }
 
-    private void init() {
+    private void init(){
         conversations = new ArrayList<>();
         conversationsAdapter = new RecentConversationsAdapter(conversations, this);
         binding.conversationRecyclerView.setAdapter(conversationsAdapter);
         database = FirebaseFirestore.getInstance();
     }
 
-    private void setListeners() {
-        binding.imageSignOut.setOnClickListener(v -> signOut());
-        binding.fabNewChat.setOnClickListener(v -> startActivity(new Intent(getApplicationContext(), UsersActivity.class)));
+
+    private void setListeners(){
+        binding.imageSignOut.setOnClickListener(v -> signOut());  // Acciones de logout
+        binding.fabNewChat.setOnClickListener(v ->
+                startActivity(new Intent(getApplicationContext(), UsersActivity.class)));  // Ir a nueva actividad
     }
 
-    private void loadUserDetails() {
+
+    /**
+     * Carga el nombre de usuario y la imagen de perfil guardada en las preferencias
+     */
+    private void loadUserDetails(){
         binding.textUsername.setText(preferenceManager.getString(Constants.KEY_USERNAME));
 
-        String encodedImage = preferenceManager.getString(Constants.KEY_IMAGE);
-        if (encodedImage != null && !encodedImage.isEmpty()) {
-            byte[] bytes = Base64.decode(encodedImage, Base64.DEFAULT);
-            Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-            binding.imageProfile.setImageBitmap(bitmap);
-        } else {
-            // Agregar imagen de perfil predeterminada si es necesario
-        }
+//        // Manejo seguro de la imagen en caso de que no esté disponible
+//        String encodedImage = preferenceManager.getString(Constants.KEY_IMAGE);
+//
+//        if (encodedImage != null && !encodedImage.isEmpty()) {
+//            try {
+//                byte[] bytes = Base64.decode(encodedImage, Base64.DEFAULT);
+//                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+//                binding.imageProfile.setImageBitmap(bitmap);
+//            } catch (IllegalArgumentException e) {
+//                // Error al decodificar la imagen
+//                showToast("Error al cargar la imagen de perfil.");
+//                e.printStackTrace();
+//            }
+//        } else {
+//            // En caso de que la imagen sea nula o vacía, cargar una imagen predeterminada
+//            //binding.imageProfile.setImageResource(R.drawable.default_profile_image);
+//        }
     }
 
-    private void showToast(String message) {
+    /**
+     * Muestra un Toast con el mensaje proporcionado
+     */
+    private void showToast(String message){
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 
-    private void listenConversations() {
+    private void listenConversations(){
         database.collection(Constants.KEY_COLLECTION_CONVERSATIONS)
                 .whereEqualTo(Constants.KEY_SENDER_ID, preferenceManager.getString(Constants.KEY_USER_ID))
                 .addSnapshotListener(eventListener);
@@ -92,71 +106,99 @@ public class MainActivity extends BaseActivity implements ConversionListener {
                 .addSnapshotListener(eventListener);
     }
 
-    private final EventListener<QuerySnapshot> eventListener = (value, error) -> {
-        if (error != null) return;
+    private final EventListener<QuerySnapshot> eventListener = (value, error) ->{
+      if(error != null)
+          return;
+      if(value !=null){
+          for (DocumentChange documentChange: value.getDocumentChanges()){
+              if(documentChange.getType() == DocumentChange.Type.ADDED){
+                  String senderId = documentChange.getDocument().getString(Constants.KEY_SENDER_ID);
+                  String receiverId = documentChange.getDocument().getString(Constants.KEY_RECEIVER_ID);
+                  ChatMessage chatMessage = new ChatMessage();
+                  chatMessage.senderId = senderId;
+                  chatMessage.receiverId = receiverId;
+                  if(preferenceManager.getString(Constants.KEY_USER_ID).equals(senderId)){
+//                      chatMessage.conversionImage = documentChange.getDocument().getString(Constants.KEY_RECEIVER_IMAGE);
+                      chatMessage.conversionUsername = documentChange.getDocument().getString(Constants.KEY_RECEIVER_USERNAME);
+                      chatMessage.conversionId = documentChange.getDocument().getString(Constants.KEY_RECEIVER_ID);
 
-        if (value != null) {
-            for (DocumentChange documentChange : value.getDocumentChanges()) {
-                if (documentChange.getType() == DocumentChange.Type.ADDED || documentChange.getType() == DocumentChange.Type.MODIFIED) {
-                    ChatMessage chatMessage = new ChatMessage();
-                    String senderId = documentChange.getDocument().getString(Constants.KEY_SENDER_ID);
-                    String receiverId = documentChange.getDocument().getString(Constants.KEY_RECEIVER_ID);
-                    chatMessage.senderId = senderId;
-                    chatMessage.receiverId = receiverId;
+                  }else{
+//                      chatMessage.conversionImage = documentChange.getDocument().getString(Constants.KEY_SENDER_IMAGE);
+                      chatMessage.conversionUsername = documentChange.getDocument().getString(Constants.KEY_SENDER_USERNAME);
+                      chatMessage.conversionId = documentChange.getDocument().getString(Constants.KEY_SENDER_ID);
+                  }
+                  chatMessage.message = documentChange.getDocument().getString(Constants.KEY_LAST_MESSAGE);
+                  chatMessage.dateObject = documentChange.getDocument().getDate(Constants.KEY_TIMESTAMP);
+                  conversations.add(chatMessage);
+              } else if(documentChange.getType() == DocumentChange.Type.MODIFIED){
+                  for(int i=0; i< conversations.size(); i++) {
+                      String senderId = documentChange.getDocument().getString(Constants.KEY_SENDER_ID);
+                      String receiverId = documentChange.getDocument().getString(Constants.KEY_RECEIVER_ID);
+                      if (conversations.get(i).senderId.equals(senderId) && conversations.get(i).receiverId.equals(receiverId)) {
+                          conversations.get(i).message = documentChange.getDocument().getString(Constants.KEY_LAST_MESSAGE);
+                          conversations.get(i).dateObject = documentChange.getDocument().getDate(Constants.KEY_TIMESTAMP);
+                          break;
+                      }
 
-                    if (preferenceManager.getString(Constants.KEY_USER_ID).equals(senderId)) {
-                        chatMessage.conversionImage = documentChange.getDocument().getString(Constants.KEY_RECEIVER_IMAGE);
-                        chatMessage.conversionUsername = documentChange.getDocument().getString(Constants.KEY_RECEIVER_USERNAME);
-                        chatMessage.conversionId = receiverId;
-                    } else {
-                        chatMessage.conversionImage = documentChange.getDocument().getString(Constants.KEY_SENDER_IMAGE);
-                        chatMessage.conversionUsername = documentChange.getDocument().getString(Constants.KEY_SENDER_USERNAME);
-                        chatMessage.conversionId = senderId;
-                    }
+                  }
 
-                    chatMessage.message = documentChange.getDocument().getString(Constants.KEY_LAST_MESSAGE);
-                    chatMessage.dateObject = documentChange.getDocument().getDate(Constants.KEY_TIMESTAMP);
+              }
+          }
 
-                    // Remueve la conversación existente con el mismo ID
-                    conversations.removeIf(conversation -> conversation.conversionId.equals(chatMessage.conversionId));
-                    conversations.add(chatMessage);
-                }
-            }
+          Collections.sort(conversations, (obj1, obj2) -> obj2.dateObject.compareTo(obj1.dateObject));
+          conversationsAdapter.notifyDataSetChanged();
+          binding.conversationRecyclerView.smoothScrollToPosition(0);
+          binding.conversationRecyclerView.setVisibility(View.VISIBLE);
+          binding.progressBar.setVisibility(View.GONE);
 
-            Collections.sort(conversations, (obj1, obj2) -> obj2.dateObject.compareTo(obj1.dateObject));
-            conversationsAdapter.notifyDataSetChanged();
-            binding.conversationRecyclerView.smoothScrollToPosition(0);
-            binding.progressBar.setVisibility(View.GONE);
-        }
+      }
+
     };
 
-    private void getToken() {
+    /**
+     * Obtiene el token de Firebase para mensajes push y lo actualiza en Firestore
+     */
+    private void getToken(){
         FirebaseMessaging.getInstance().getToken().addOnSuccessListener(this::updateToken);
     }
 
-    private void updateToken(String token) {
+    /**
+     * Actualiza el token FCM en Firestore
+     */
+    private void updateToken(String token){
         preferenceManager.putString(Constants.KEY_FCM_TOKEN, token);
-        DocumentReference documentReference = database.collection(Constants.KEY_COLLECTION_USERS)
-                .document(preferenceManager.getString(Constants.KEY_USER_ID));
-        documentReference.update(Constants.KEY_FCM_TOKEN, token);
+        FirebaseFirestore database = FirebaseFirestore.getInstance();
+        DocumentReference documentReference =
+                database.collection(Constants.KEY_COLLECTION_USERS).document(
+                        preferenceManager.getString(Constants.KEY_USER_ID)
+                );
+        documentReference.update(Constants.KEY_FCM_TOKEN, token)
+                .addOnFailureListener(e -> showToast("Unable to update token"));
     }
 
-    private void signOut() {
+    /**
+     * Cierra sesión del usuario, elimina el token FCM y borra las preferencias
+     */
+    private void signOut(){
         showToast("Cerrando sesión...");
-        DocumentReference documentReference = database.collection(Constants.KEY_COLLECTION_USERS)
-                .document(preferenceManager.getString(Constants.KEY_USER_ID));
+        FirebaseFirestore database = FirebaseFirestore.getInstance();
+        DocumentReference documentReference =
+                database.collection(Constants.KEY_COLLECTION_USERS).document(
+                        preferenceManager.getString(Constants.KEY_USER_ID)
+                );
         HashMap<String, Object> updates = new HashMap<>();
         updates.put(Constants.KEY_FCM_TOKEN, FieldValue.delete());
         documentReference.update(updates)
-                .addOnSuccessListener(unused -> {
+                .addOnSuccessListener(unused ->{
                     preferenceManager.clear();
                     startActivity(new Intent(getApplicationContext(), SignInActivity.class));
                     finish();
-                });
+                })
+                .addOnFailureListener(e -> showToast("Unable to sign out"));
     }
 
     @Override
-    public void onConversionClicked(User user) {
+    public void onConversionClicked(User user){
         Intent intent = new Intent(getApplicationContext(), ChatActivity.class);
         intent.putExtra(Constants.KEY_USER, user);
         startActivity(intent);
