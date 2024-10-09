@@ -1,34 +1,18 @@
 package com.pucmm.chatapp.activities;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.util.Base64;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.pucmm.chatapp.R;
 import com.pucmm.chatapp.databinding.ActivitySignUpBinding;
 import com.pucmm.chatapp.utilities.Constants;
 import com.pucmm.chatapp.utilities.PreferenceManager;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.nio.file.FileAlreadyExistsException;
 import java.util.HashMap;
 
 public class SignUpActivity extends AppCompatActivity {
@@ -68,17 +52,17 @@ public class SignUpActivity extends AppCompatActivity {
         loading(true);
         FirebaseFirestore database = FirebaseFirestore.getInstance();
         HashMap<String, Object> user = new HashMap<>();
-        user.put(Constants.KEY_USERNAME, binding.inputUsername.getText().toString());
-        user.put(Constants.KEY_EMAIL, binding.inputEmail.getText().toString());
-        user.put(Constants.KEY_PASSWORD, binding.inputPassword.getText().toString());
+        user.put(Constants.USERNAME, binding.inputUsername.getText().toString());
+        user.put(Constants.EMAIL, binding.inputEmail.getText().toString());
+        user.put(Constants.PASSWORD, binding.inputPassword.getText().toString());
 //        user.put(Constants.KEY_IMAGE, encodedImage);
-        database.collection(Constants.KEY_COLLECTION_USERS)
+        database.collection(Constants.COLLECTION_USERS)
                 .add(user)
                 .addOnSuccessListener(documentReference -> {
                     loading(false);
-                    preferenceManager.putBoolean(Constants.KEY_IS_SIGNED_IN, true);
-                    preferenceManager.putString(Constants.KEY_USER_ID, documentReference.getId());
-                    preferenceManager.putString(Constants.KEY_USERNAME, binding.inputUsername.getText().toString());
+                    preferenceManager.putBoolean(Constants.IS_SIGNED_IN, true);
+                    preferenceManager.putString(Constants.USER_ID, documentReference.getId());
+                    preferenceManager.putString(Constants.USERNAME, binding.inputUsername.getText().toString());
 //                    preferenceManager.putString(Constants.KEY_IMAGE, encodedImage);
                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
