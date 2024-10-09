@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
@@ -9,31 +10,34 @@
     android:background="@color/dark_mint_green"
     tools:context=".activities.MainActivity">
 
+    <!-- Imagen de perfil del usuario -->
     <com.makeramen.roundedimageview.RoundedImageView
         android:id="@+id/imageProfile"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="12dp"
-        android:background="@drawable/background_icon"
-        android:scaleType="centerCrop"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:riv_corner_radius="8dp" />
+        android:layout_width="40dp"
+    android:layout_height="40dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="24dp"
+    android:background="@drawable/background_icon"
+    android:scaleType="centerCrop"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    app:riv_corner_radius="8dp" />
 
+    <!-- Botón de cerrar sesión -->
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/imageSignOut"
         android:layout_width="30dp"
         android:layout_height="30dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="24dp"
         android:layout_marginEnd="16dp"
         android:background="@drawable/background_icon"
         android:padding="6dp"
         android:src="@drawable/ic_logout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:tint="@color/white"/>
+        android:tint="@color/white" />
 
+    <!-- Texto del nombre de usuario -->
     <TextView
         android:id="@+id/textUsername"
         android:layout_width="0dp"
@@ -44,51 +48,53 @@
         android:gravity="center"
         android:maxLines="1"
         android:textColor="@color/white"
-        android:textSize="14sp"
+        android:textSize="16sp"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@+id/imageProfile"
-        app:layout_constraintEnd_toStartOf="@+id/imageSignOut"
-        app:layout_constraintStart_toEndOf="@+id/imageProfile"
-        app:layout_constraintTop_toTopOf="@id/imageProfile"/>
+    app:layout_constraintBottom_toBottomOf="@+id/imageProfile"
+    app:layout_constraintEnd_toStartOf="@+id/imageSignOut"
+    app:layout_constraintStart_toEndOf="@+id/imageProfile"
+    app:layout_constraintTop_toTopOf="@id/imageProfile" />
 
+    <!-- Contenedor para la RecyclerView y ProgressBar -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginTop="16dp"
-        android:background="@drawable/background_content_bottom"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageProfile">
+        android:layout_marginTop="24dp"
+    android:background="@drawable/background_content_bottom"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/imageProfile">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/conversationRecyclerView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:orientation="vertical"
-            android:overScrollMode="never"
-            android:padding="20dp"
-            android:visibility="gone"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+    <!-- RecyclerView para las conversaciones -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/conversationRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:orientation="vertical"
+        android:overScrollMode="never"
+        android:padding="20dp"
+        android:visibility="gone"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
 
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:layout_gravity="center"/>
+    <!-- ProgressBar centrado mientras se carga -->
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:layout_gravity="center" />
+</FrameLayout>
 
-    </FrameLayout>
-
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabNewChat"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="24dp"
-        android:contentDescription="@string/app_name"
-        android:src="@drawable/ic_add"
-        android:backgroundTint="@color/dark_mint_green"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:tint="@color/white"/>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- FloatingActionButton para nuevo chat -->
+<com.google.android.material.floatingactionbutton.FloatingActionButton
+android:id="@+id/fabNewChat"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_marginEnd="24dp"
+android:layout_marginBottom="24dp"
+android:contentDescription="@string/app_name"
+android:src="@drawable/ic_add"
+android:backgroundTint="@color/dark_mint_green"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    android:tint="@color/white" />
+    </androidx.constraintlayout.widget.ConstraintLayout>

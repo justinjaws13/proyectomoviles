@@ -21,10 +21,11 @@ import com.pucmm.chatapp.activities.ChatActivity;
 import com.pucmm.chatapp.models.User;
 import com.pucmm.chatapp.utilities.Constants;
 
+import java.util.List;
 import java.util.Random;
+import java.util.concurrent.Future;
 
 public class MessagingService extends FirebaseMessagingService {
-
     @Override
     public void onNewToken(@NonNull String token) {
         super.onNewToken(token);

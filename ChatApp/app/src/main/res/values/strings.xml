@@ -14,4 +14,6 @@
     <string name="escribe_tu_mensaje">Escribe tu mensaje...</string>
     <string name="online">Online</string>
     <string name="imagen">imagen</string>
+    <string name="chatapp">ChatApp</string>
+    <string name="inicia_sesi_n_o_registrate_para_poder_continuar">Inicia sesión o registrate para poder continuar!</string>
 </resources>

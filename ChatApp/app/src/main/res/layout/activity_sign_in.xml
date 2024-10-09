@@ -9,7 +9,10 @@
     android:overScrollMode="never"
     android:padding="24dp"
     android:scrollbars="none"
-    tools:context=".activities.SignInActivity">
+    android:fillViewport="true"
+    tools:context=".activities.SignInActivity"
+    android:background="@drawable/background_chat_input">
+    >
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -17,58 +20,65 @@
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
+        <!-- Título de la app -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
-            android:text="@string/bienvenido"
-            android:textColor="@color/black"
-            android:textSize="18sp"
+            android:text="@string/chatapp"
+            android:textColor="@color/white"
+            android:textSize="24sp"
             android:textStyle="bold" />
 
+        <!-- Subtítulo -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/inicia_sesion_para_continuar"
-            android:textColor="@color/gray"
-            android:textSize="12sp"
+            android:layout_marginTop="8dp"
+            android:text="@string/inicia_sesi_n_o_registrate_para_poder_continuar"
+            android:textColor="@color/white"
+            android:textSize="18sp"
             android:textStyle="bold" />
 
+        <!-- Campo de Email -->
         <EditText
             android:id="@+id/inputEmail"
             android:layout_width="match_parent"
-            android:layout_height="45dp"
+            android:layout_height="55dp"
             android:layout_marginTop="40dp"
             android:background="@drawable/background_input"
             android:hint="@string/email"
             android:imeOptions="actionNext"
             android:importantForAutofill="no"
             android:inputType="textEmailAddress"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
             android:textColor="@color/black"
-            android:textSize="13sp" />
+            android:textColorHint="@color/gray"
+            android:textSize="16sp" />
 
+        <!-- Campo de Password -->
         <EditText
             android:id="@+id/inputPassword"
             android:layout_width="match_parent"
-            android:layout_height="45dp"
-            android:layout_marginTop="16dp"
+            android:layout_height="55dp"
+            android:layout_marginTop="24dp"
             android:background="@drawable/background_input"
             android:hint="@string/password"
             android:imeOptions="actionDone"
             android:importantForAutofill="no"
             android:inputType="textPassword"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
             android:textColor="@color/black"
-            android:textSize="13sp" />
+            android:textColorHint="@color/gray"
+            android:textSize="16sp" />
 
+        <!-- Botón de Iniciar Sesión -->
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="30dp"
             android:animateLayoutChanges="true">
 
             <com.google.android.material.button.MaterialButton
@@ -77,30 +87,30 @@
                 android:layout_height="50dp"
                 android:text="@string/iniciar_sesion"
                 android:textColor="@color/white"
-                android:textSize="13sp"
+                android:textSize="16sp"
                 android:textStyle="bold"
+                android:backgroundTint="@color/dark_gray"
                 app:cornerRadius="8dp" />
 
+            <!-- ProgressBar que aparece mientras se carga -->
             <ProgressBar
                 android:id="@+id/progressBar"
                 android:layout_width="25dp"
                 android:layout_height="25dp"
                 android:layout_gravity="center"
-                android:visibility="invisible"/>
+                android:visibility="invisible" />
 
         </FrameLayout>
 
-
-
+        <!-- Texto para crear nueva cuenta -->
         <TextView
             android:id="@+id/textCreateNewAccount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="40dp"
             android:text="@string/crear_nueva_cuenta"
-            android:textColor="@color/black"
-            android:textSize="13sp"
+            android:textColor="@color/white"
+            android:textSize="16sp"
             android:textStyle="bold" />
-
     </LinearLayout>
 </ScrollView>

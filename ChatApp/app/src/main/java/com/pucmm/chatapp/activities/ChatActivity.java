@@ -1,9 +1,12 @@
 package com.pucmm.chatapp.activities;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Base64;
@@ -12,8 +15,11 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.app.ActivityCompat;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+//import com.google.auth.oauth2.AccessToken;
+//import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -23,6 +29,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.pucmm.chatapp.adapters.ChatAdapter;
 import com.pucmm.chatapp.databinding.ActivityChatBinding;
 import com.pucmm.chatapp.models.ChatMessage;
+import com.pucmm.chatapp.models.TokenGenerator;
 import com.pucmm.chatapp.models.User;
 import com.pucmm.chatapp.network.ApiClient;
 import com.pucmm.chatapp.network.ApiService;
@@ -34,7 +41,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -45,6 +54,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -61,11 +74,18 @@ public class ChatActivity extends BaseActivity {
     private Boolean isReceiverAvailable = false;
     private String encodedImage;
 
+
+    // Ruta del archivo de la cuenta de servicio de Firebase
+    private static final String SERVICE_ACCOUNT_FILE = "C:\\Users\\Coshita\\AndroidStudioProjects\\proyectomoviles\\ChatApp\\app\\chatapp1-5f3e5-925a2f3843db.json"; // Cambia esta ruta
+    private static final String FCM_API_URL = "https://fcm.googleapis.com/v1/projects/860878442387/messages:send";
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityChatBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        requestNotificationPermission();
         setListeners();
         loadReceiverDetails();
         init();
@@ -187,37 +207,68 @@ public class ChatActivity extends BaseActivity {
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 
-    private void sendNotification(String messageBody){
-        ApiClient.getClient().create(ApiService.class).sendMessage(Constants.getRemoteMsgHeaders(), messageBody)
-                .enqueue(new Callback<String>() {
-                    @Override
-                    public void onResponse(Call<String> call, Response<String> response) {
-                        if(response.isSuccessful()){
-                            try{
-                                if(response.body() !=null){
-                                    JSONObject responseJson = new JSONObject(response.body());
-                                    JSONArray results = responseJson.getJSONArray("results");
-                                    if(responseJson.getInt("failure") == 1){
-                                        JSONObject error = (JSONObject) results.get(0);
-                                        showToast(error.getString("error"));
-                                    }
-                                }
-                            }catch (JSONException e){
-                                e.printStackTrace();
-                            }
-                            showToast("Notification sent successfully");
-                        }
-                        else{
-                            showToast("Error:" + response.code());
-                        }
-                    }
 
-                    @Override
-                    public void onFailure(Call<String> call, Throwable t) {
-                       showToast(t.getMessage());
-                    }
-                });
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);
+            }
+        }
     }
+
+//    private String getAccessToken() throws Exception {
+//        GoogleCredentials credentials = GoogleCredentials
+//                .fromStream(new FileInputStream(SERVICE_ACCOUNT_FILE))
+//                .createScoped(Collections.singleton("https://www.googleapis.com/auth/cloud-platform"));
+//        credentials.refreshIfExpired();
+//        AccessToken token = credentials.getAccessToken();
+//        return token.getTokenValue();
+//    }
+
+    private void sendNotification(String messageBody) {
+        try {
+            TokenGenerator tokenGenerator = new TokenGenerator();
+            String jwt = tokenGenerator.createJWT();
+            System.out.println("JWT generado: " + jwt);
+
+            // Obtener el access token en segundo plano
+            tokenGenerator.getAccessTokenAsync(jwt, new TokenGenerator.Callback<String>() {
+                @Override
+                public void onSuccess(String accessToken) {
+                    System.out.println("Access Token: " + accessToken);
+
+                    HashMap<String, String> headers = new HashMap<>();
+                    headers.put("Authorization", "Bearer " + accessToken);
+                    headers.put("Content-Type", "application/json; UTF-8");
+
+                    ApiClient.getClient().create(ApiService.class).sendMessage(headers, messageBody)
+                            .enqueue(new Callback<String>() {
+                                @Override
+                                public void onResponse(Call<String> call, Response<String> response) {
+                                    // Manejo de la respuesta
+                                }
+
+                                @Override
+                                public void onFailure(Call<String> call, Throwable t) {
+                                    showToast(t.getMessage());
+                                }
+                            });
+                }
+
+                @Override
+                public void onError(Exception e) {
+                    showToast("Error obteniendo el token: " + e.getMessage());
+                }
+            });
+
+        } catch (Exception e) {
+            showToast("Error: " + e.getMessage());
+        }
+    }
+
+
+
+
 
     private void listenAvailabilityOfReceiver(){
         database.collection(Constants.KEY_COLLECTION_USERS).document(
@@ -406,4 +457,6 @@ public class ChatActivity extends BaseActivity {
                 }
             }
     );
+
+
 }
