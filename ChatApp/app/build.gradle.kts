@@ -79,6 +79,7 @@ dependencies {
     // Other dependencies
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("com.makeramen:roundedimageview:2.3.0")
+    implementation(libs.firebase.messaging)
 
     // Test dependencies
     testImplementation(libs.junit)
