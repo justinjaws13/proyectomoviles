@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-// Consulta GraphQL para obtener una lista de Pokémon con su nombre, tipo e imagen.
+// Consulta GraphQL para obtener una lista de Pokémon con su nombre, tipo e imagen con paginación.
 const String getPokemonsQuery = r'''
-  query {
-    pokemon_v2_pokemon(limit: 20) {
+  query GetPokemons($limit: Int, $offset: Int) {
+    pokemon_v2_pokemon(limit: $limit, offset: $offset) {
       id
       name
       pokemon_v2_pokemonsprites {
@@ -20,7 +20,16 @@ const String getPokemonsQuery = r'''
   }
 ''';
 
-class PokemonListScreen extends StatelessWidget {
+class PokemonListScreen extends StatefulWidget {
+  @override
+  _PokemonListScreenState createState() => _PokemonListScreenState();
+}
+
+class _PokemonListScreenState extends State<PokemonListScreen> {
+  final int _limit = 20;
+  int _offset = 0;
+  List _pokemons = [];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -30,9 +39,11 @@ class PokemonListScreen extends StatelessWidget {
       body: Query(
         options: QueryOptions(
           document: gql(getPokemonsQuery),
+          variables: {'limit': _limit, 'offset': _offset},
+          fetchPolicy: FetchPolicy.networkOnly,
         ),
         builder: (QueryResult result, {VoidCallback? refetch, FetchMore? fetchMore}) {
-          if (result.isLoading) {
+          if (result.isLoading && _pokemons.isEmpty) {
             return Center(child: CircularProgressIndicator());
           }
 
@@ -40,12 +51,33 @@ class PokemonListScreen extends StatelessWidget {
             return Center(child: Text('Error: ${result.exception.toString()}'));
           }
 
-          final List pokemons = result.data?['pokemon_v2_pokemon'] ?? [];
+          // Agrega los nuevos Pokémon a la lista existente
+          final List newPokemons = result.data?['pokemon_v2_pokemon'] ?? [];
+          _pokemons.addAll(newPokemons);
+
+          // Configuración para obtener más resultados al hacer scroll
+          FetchMoreOptions fetchMoreOptions = FetchMoreOptions(
+            variables: {'offset': _pokemons.length},
+            updateQuery: (previousResultData, fetchMoreResultData) {
+              final List<dynamic> previousPokemons = previousResultData?['pokemon_v2_pokemon'] ?? [];
+              final List<dynamic> morePokemons = fetchMoreResultData?['pokemon_v2_pokemon'] ?? [];
+
+              return {
+                'pokemon_v2_pokemon': [...previousPokemons, ...morePokemons],
+              };
+            },
+          );
 
           return ListView.builder(
-            itemCount: pokemons.length,
+            itemCount: _pokemons.length + 1, // +1 para el indicador de carga al final
             itemBuilder: (context, index) {
-              final pokemon = pokemons[index];
+              if (index == _pokemons.length) {
+                // Al llegar al final, carga más datos
+                fetchMore!(fetchMoreOptions);
+                return Center(child: CircularProgressIndicator());
+              }
+
+              final pokemon = _pokemons[index];
               final name = pokemon['name'];
               final types = pokemon['pokemon_v2_pokemontypes']
                   .map((type) => type['pokemon_v2_type']['name'])
