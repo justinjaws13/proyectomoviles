@@ -1,18 +1,41 @@
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'dev.flutter.flutter-gradle-plugin'
+}
+
+android {
+    namespace 'com.example.pokedex'
+    compileSdkVersion 33
+
+    defaultConfig {
+        applicationId "com.example.pokedex"
+        minSdkVersion 21
+        targetSdkVersion 33
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
+        }
     }
 }
 
-rootProject.buildDir = "../build"
-subprojects {
-    project.buildDir = "${rootProject.buildDir}/${project.name}"
-}
-subprojects {
-    project.evaluationDependsOn(":app")
-}
-
-tasks.register("clean", Delete) {
-    delete rootProject.buildDir
+flutter {
+    source '../..'
 }
