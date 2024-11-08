@@ -4,8 +4,14 @@
     <option name="autoReloadType" value="NONE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f62d285c-bbdb-4ce4-b98d-cb8fd301c7b1" name="Changes" comment="Nuevo proyecto en el que usando de base el anterior con respecto al login y sign in, y se agrego la funcionalidad de poder enviar mensajes en tiempo real, existe un problema al iniciar sesion porque se cierra la aplicacion, sin embargo al registrarte puedes usarla sin ningun problema, revisar eso. &#10;&#10;faltan las notificaciones y el poder enviar imagenes">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="c3c9f9ea-50ec-4ef6-ae32-b87d943f40d0" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/caches/deviceStreaming.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/migrations.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -15,44 +21,26 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
-  <component name="ExternalProjectsManager">
-    <system id="GRADLE">
-      <state>
-        <projects_view>
-          <tree_state>
-            <expand>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="proyectoMovil1" type="f1a62948:ProjectNode" />
-              </path>
-            </expand>
-            <select />
-          </tree_state>
-        </projects_view>
-      </state>
-    </system>
-  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory">{
-  &quot;lastFilter&quot;: {
-    &quot;state&quot;: &quot;OPEN&quot;,
-    &quot;assignee&quot;: &quot;justinjaws13&quot;
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "justinjaws13"
   }
-}</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/justinjaws13/proyectomoviles.git&quot;,
-    &quot;accountId&quot;: &quot;c53ae91a-31dd-4863-bfc5-201a7373b540&quot;
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/justinjaws13/proyectomoviles",
+    "accountId": "6e8c4d1d-f046-4f23-b560-9ceec502cb10"
   }
-}</component>
-  <component name="ProjectColorInfo">{
-  &quot;customColor&quot;: &quot;&quot;,
-  &quot;associatedIndex&quot;: 6
-}</component>
-  <component name="ProjectId" id="2ma8vGUl7c2M3Lv8A1gvQZUKmwz" />
-  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+}]]></component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "customColor": "",
+  "associatedIndex": 4
+}]]></component>
+  <component name="ProjectId" id="2oaBcuh3Bppq2EvF48BeIVuTTD7" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -62,45 +50,24 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.cidr.known.project.marker": "true",
     "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "android.gradle.sync.needed": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "dart.analysis.tool.window.visible": "false",
     "git-widget-placeholder": "main",
     "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Coshita/AndroidStudioProjects/proyectomoviles",
     "show.migrate.to.gradle.popup": "false"
   }
 }]]></component>
-  <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="C:\Users\Coshita\AndroidStudioProjects\proyectomoviles" />
-    </key>
-  </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="f62d285c-bbdb-4ce4-b98d-cb8fd301c7b1" name="Changes" comment="" />
-      <created>1727303559915</created>
+      <changelist id="c3c9f9ea-50ec-4ef6-ae32-b87d943f40d0" name="Changes" comment="" />
+      <created>1731097890086</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1727303559915</updated>
+      <updated>1731097890086</updated>
     </task>
-    <task id="LOCAL-00001" summary="Nuevo proyecto en el que usando de base el anterior con respecto al login y sign in, y se agrego la funcionalidad de poder enviar mensajes en tiempo real, existe un problema al iniciar sesion porque se cierra la aplicacion, sin embargo al registrarte puedes usarla sin ningun problema, revisar eso. &#10;&#10;faltan las notificaciones y el poder enviar imagenes">
-      <option name="closed" value="true" />
-      <created>1728275436478</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1728275436478</updated>
-    </task>
-    <option name="localTasksCounter" value="2" />
     <servers />
-  </component>
-  <component name="VcsManagerConfiguration">
-    <MESSAGE value="Nuevo proyecto en el que usando de base el anterior con respecto al login y sign in, y se agrego la funcionalidad de poder enviar mensajes en tiempo real, existe un problema al iniciar sesion porque se cierra la aplicacion, sin embargo al registrarte puedes usarla sin ningun problema, revisar eso. &#10;&#10;faltan las notificaciones y el poder enviar imagenes" />
-    <option name="LAST_COMMIT_MESSAGE" value="Nuevo proyecto en el que usando de base el anterior con respecto al login y sign in, y se agrego la funcionalidad de poder enviar mensajes en tiempo real, existe un problema al iniciar sesion porque se cierra la aplicacion, sin embargo al registrarte puedes usarla sin ningun problema, revisar eso. &#10;&#10;faltan las notificaciones y el poder enviar imagenes" />
   </component>
 </project>
