@@ -21,20 +21,22 @@ const String getPokemonsQuery = r'''
 ''';
 
 class PokemonListScreen extends StatefulWidget {
+  const PokemonListScreen({super.key});
+
   @override
   _PokemonListScreenState createState() => _PokemonListScreenState();
 }
 
 class _PokemonListScreenState extends State<PokemonListScreen> {
   final int _limit = 20;
-  int _offset = 0;
-  List _pokemons = [];
+  final int _offset = 0;
+  final List _pokemons = [];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Pokédex"),
+        title: const Text("Pokédex"),
       ),
       body: Query(
         options: QueryOptions(
@@ -44,7 +46,7 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
         ),
         builder: (QueryResult result, {VoidCallback? refetch, FetchMore? fetchMore}) {
           if (result.isLoading && _pokemons.isEmpty) {
-            return Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator());
           }
 
           if (result.hasException) {
@@ -74,7 +76,7 @@ class _PokemonListScreenState extends State<PokemonListScreen> {
               if (index == _pokemons.length) {
                 // Al llegar al final, carga más datos
                 fetchMore!(fetchMoreOptions);
-                return Center(child: CircularProgressIndicator());
+                return const Center(child: CircularProgressIndicator());
               }
 
               final pokemon = _pokemons[index];

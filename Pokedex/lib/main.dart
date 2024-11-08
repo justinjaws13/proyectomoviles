@@ -17,13 +17,13 @@ void main() async {
 class MyApp extends StatelessWidget {
   final GraphQLClient client;
 
-  MyApp({required this.client});
+  const MyApp({super.key, required this.client});
 
   @override
   Widget build(BuildContext context) {
     return GraphQLProvider(
       client: ValueNotifier(client),
-      child: MaterialApp(
+      child: const MaterialApp(
         title: 'Pokédex',
         home: PokemonListScreen(),
       ),
