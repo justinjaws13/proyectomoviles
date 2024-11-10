@@ -66,8 +66,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: Colors.green,
+                            color: type == 'Grass' ? Colors.greenAccent : type == "Fire" ? Colors.redAccent : type == "Water" ? Colors.blue
+                            : type == "Electric" ? Colors.yellowAccent : type == "Rock" ? Colors.grey : type == "Ground" ? Colors.brown
+                            : type == "Psychic" ? Colors.indigo : type == "Fighting" ? Colors.orangeAccent : type == "Bug" ? Colors.lightGreenAccent
+                            : type == "Ghost" ? Colors.deepPurple : type == "Normal" ? Colors.black26 : type == 'Poison' ? Colors.deepPurpleAccent : type == "Ice" ? Colors.lightBlueAccent : Colors.pink,
                             borderRadius: const BorderRadius.all(Radius.circular(20)),
+
                           ),
                           child: Stack(
                             children: [
