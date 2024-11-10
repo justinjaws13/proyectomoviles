@@ -47,10 +47,10 @@ class _HomeScreenState extends State<HomeScreen> {
             top: 150,
             bottom: 0,
             width: width,
-            child: SingleChildScrollView(  // Añadimos SingleChildScrollView para evitar desbordamiento
+            child: SingleChildScrollView(  //  SingleChildScrollView para evitar desbordamiento
               child: Column(
                 children: [
-                  // Si hay datos del pokédex, mostramos el GridView
+                  // Si hay datos del pokédex, se muestra el GridView
                   pokedex.isNotEmpty
                       ? GridView.builder(
                     shrinkWrap: true,
