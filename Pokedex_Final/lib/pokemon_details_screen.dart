@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -8,11 +7,11 @@ class PokemonDetailScreen extends StatelessWidget {
   final int heroTag;
 
   const PokemonDetailScreen({
-    Key? key,
+    super.key,
     required this.pokemonDetail,
     required this.color,
     required this.heroTag,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +20,19 @@ class PokemonDetailScreen extends StatelessWidget {
     final imageUrl = spriteData.isNotEmpty
         ? spriteData[0]['sprites']['front_default'] // Access front_default directly
         : '';
+
+    // Evolution chain and current evolution details
+    final speciesData = pokemonDetail['pokemon_v2_pokemonspecy'];
+    final evolutionChain = speciesData['pokemon_v2_evolutionchain']['pokemon_v2_pokemonspecies'];
+    final currentPokemonName = pokemonDetail['name'];
+
+    // Determine previous and next evolutions
+    final evolutionNames = evolutionChain.map((evolution) => evolution['name']).toList();
+    final currentIndex = evolutionNames.indexOf(currentPokemonName);
+    final previousEvolution = currentIndex > 0 ? evolutionNames[currentIndex - 1] : 'None';
+    final nextEvolution = currentIndex < evolutionNames.length - 1 ? evolutionNames[currentIndex + 1] : 'None';
+
+
 
     return Scaffold(
       backgroundColor: color,
@@ -76,7 +88,8 @@ class PokemonDetailScreen extends StatelessWidget {
                   buildSection("Moves", pokemonDetail['pokemon_v2_pokemonmoves']
                       .map((move) => move['pokemon_v2_move']['name'])
                       .join(', ')),
-                  // Temporarily removing evolutions section
+                  buildSection("Previous Evolution", previousEvolution),
+                  buildSection("Next Evolution", nextEvolution),
                 ],
               ),
             ),

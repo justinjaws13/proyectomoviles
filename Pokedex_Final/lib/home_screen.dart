@@ -1,8 +1,8 @@
-import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'pokemon_details_screen.dart';
+import 'dart:convert';
 
 const String getPokemonListQuery = """
   query {
@@ -10,6 +10,16 @@ const String getPokemonListQuery = """
       name
       height
       weight
+      pokemon_v2_pokemonspecy {
+        generation_id
+        evolution_chain_id
+        evolves_from_species_id
+        pokemon_v2_evolutionchain {
+          pokemon_v2_pokemonspecies {
+            name
+          }
+        }
+      }
       pokemon_v2_pokemontypes {
         pokemon_v2_type {
           name
@@ -38,33 +48,71 @@ const String getPokemonListQuery = """
   }
 """;
 
-
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String? selectedType;
+  int? selectedGeneration;
+
+  final List<String> types = [
+    'All', 'Grass', 'Fire', 'Water', 'Electric', 'Rock', 'Ground', 'Psychic',
+    'Fighting', 'Bug', 'Ghost', 'Normal', 'Poison', 'Ice', 'Dragon', 'Dark',
+    'Fairy', 'Steel', 'Flying'
+  ];
+  final List<int> generations = [1, 2, 3, 4, 5, 6, 7, 8];
 
   @override
   Widget build(BuildContext context) {
     var width = MediaQuery.of(context).size.width;
 
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("Pokedex"),
+        actions: [
+          DropdownButton<String>(
+            value: selectedType,
+            hint: const Text("Filter by Type"),
+            items: types.map((type) {
+              return DropdownMenuItem<String>(
+                value: type,
+                child: Text(type),
+              );
+            }).toList(),
+            onChanged: (value) {
+              setState(() {
+                selectedType = value == 'All' ? null : value;
+              });
+            },
+          ),
+          DropdownButton<int>(
+            value: selectedGeneration,
+            hint: const Text("Filter by Generation"),
+            items: generations.map((gen) {
+              return DropdownMenuItem<int>(
+                value: gen,
+                child: Text("Gen $gen"),
+              );
+            }).toList(),
+            onChanged: (value) {
+              setState(() {
+                selectedGeneration = value;
+              });
+            },
+          ),
+        ],
+      ),
       body: Stack(
         children: [
-          // Background image (pokeball)
           Positioned(
             top: -50,
             right: -50,
             child: Image.asset('images/pokeball2-remove.png', width: 200, fit: BoxFit.fitWidth),
           ),
-          // Title
-          Positioned(
-            top: 80,
-            left: 20,
-            child: Text(
-              "Pokedex",
-              style: const TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.black),
-            ),
-          ),
-          // Query and GridView of Pokémon
           Positioned(
             top: 150,
             bottom: 0,
@@ -78,12 +126,25 @@ class HomeScreen extends StatelessWidget {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (result.hasException) {
-                  // Display the exact error to understand what’s going wrong
                   return Center(child: Text('Error al cargar datos: ${result.exception.toString()}'));
                 }
 
-                // Extract the list of Pokémon
                 final pokedex = result.data?['pokemon_v2_pokemon'] ?? [];
+
+                // Apply filters
+                final filteredPokedex = pokedex.where((pokemon) {
+                  // Extract types and generation info
+                  final types = (pokemon['pokemon_v2_pokemontypes'] as List)
+                      .map((typeData) => (typeData['pokemon_v2_type']['name'] as String).toLowerCase())
+                      .toList();
+                  final generation = pokemon['pokemon_v2_pokemonspecy']?['generation_id'];
+
+                  // Check for type match and generation match
+                  final typeMatches = selectedType == null || types.contains(selectedType!.toLowerCase());
+                  final generationMatches = selectedGeneration == null || generation == selectedGeneration;
+
+                  return typeMatches && generationMatches;
+                }).toList();
 
                 return SingleChildScrollView(
                   child: GridView.builder(
@@ -93,9 +154,9 @@ class HomeScreen extends StatelessWidget {
                       crossAxisCount: 2,
                       childAspectRatio: 1.4,
                     ),
-                    itemCount: pokedex.length,
+                    itemCount: filteredPokedex.length,
                     itemBuilder: (context, index) {
-                      final pokemon = pokedex[index];
+                      final pokemon = filteredPokedex[index];
                       final type = pokemon['pokemon_v2_pokemontypes'].isNotEmpty
                           ? pokemon['pokemon_v2_pokemontypes'][0]['pokemon_v2_type']['name']
                           : 'Unknown';
@@ -184,31 +245,31 @@ class HomeScreen extends StatelessWidget {
   // Function to get the color based on Pokémon type
   Color _getTypeColor(String type) {
     switch (type) {
-      case 'Grass':
+      case 'grass':
         return Colors.greenAccent;
-      case 'Fire':
+      case 'fire':
         return Colors.redAccent;
-      case 'Water':
+      case 'water':
         return Colors.blue;
-      case 'Electric':
+      case 'electric':
         return Colors.yellowAccent;
-      case 'Rock':
+      case 'rock':
         return Colors.grey;
-      case 'Ground':
+      case 'ground':
         return Colors.brown;
-      case 'Psychic':
+      case 'psychic':
         return Colors.indigo;
-      case 'Fighting':
+      case 'fighting':
         return Colors.orangeAccent;
-      case 'Bug':
+      case 'bug':
         return Colors.lightGreenAccent;
-      case 'Ghost':
+      case 'ghost':
         return Colors.deepPurple;
-      case 'Normal':
+      case 'normal':
         return Colors.black26;
-      case 'Poison':
+      case 'poison':
         return Colors.deepPurpleAccent;
-      case 'Ice':
+      case 'ice':
         return Colors.lightBlueAccent;
       default:
         return Colors.pink;
