@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex_final/home_screen.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 
-
-void main() {
+void main() async {
+  await initHiveForFlutter();
   runApp(const MyApp());
 }
 
@@ -12,14 +13,21 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Pokedex app',
-      theme: ThemeData(
+    final HttpLink httpLink = HttpLink('https://beta.pokeapi.co/graphql/v1beta');
 
-        //colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
-        useMaterial3: true,
+    ValueNotifier<GraphQLClient> client = ValueNotifier(
+      GraphQLClient(
+        link: httpLink,
+        cache: GraphQLCache(),
       ),
-      home: const HomeScreen(),
+    );
+
+    return GraphQLProvider(
+        client: client,
+        child: const MaterialApp(
+        title: 'Pokedex App',
+        home: HomeScreen(),
+    ),
     );
   }
 }
