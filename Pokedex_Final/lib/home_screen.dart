@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:pokedex_final/pokemon_details_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -34,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Positioned(
             top: -50,
             right: -50,
-            child: Image.asset('images/pokeball2.png', width: 200, fit: BoxFit.fitWidth),
+            child: Image.asset('images/pokeball2-remove.png', width: 200, fit: BoxFit.fitWidth),
           ),
           // Contenido desplazable
           Positioned(
@@ -62,8 +63,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemCount: pokedex.length,
                     itemBuilder: (context, index) {
                       var type = pokedex[index]['type'][0];
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12),
+                      return InkWell(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12),
                         child: Container(
                           decoration: BoxDecoration(
                             color: type == 'Grass' ? Colors.greenAccent : type == "Fire" ? Colors.redAccent : type == "Water" ? Colors.blue
@@ -116,6 +118,19 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                           ),
                         ),
+                      ),
+                        onTap: (){
+                          //para hacer una nueva pantalla de detalles
+                          //este tipo de funcion me ayuda a navegar un lugar a otro, viaja de punto a(context)  a punto b (material page route)
+                          Navigator.push(context, MaterialPageRoute(builder: (_) => PokemonDetailScreen(
+                            pokemonDetail: pokedex[index],
+                            color: type == 'Grass' ? Colors.greenAccent : type == "Fire" ? Colors.redAccent : type == "Water" ? Colors.blue
+                                : type == "Electric" ? Colors.yellowAccent : type == "Rock" ? Colors.grey : type == "Ground" ? Colors.brown
+                                : type == "Psychic" ? Colors.indigo : type == "Fighting" ? Colors.orangeAccent : type == "Bug" ? Colors.lightGreenAccent
+                                : type == "Ghost" ? Colors.deepPurple : type == "Normal" ? Colors.black26 : type == 'Poison' ? Colors.deepPurpleAccent : type == "Ice" ? Colors.lightBlueAccent : Colors.pink,
+                            heroTag: index,
+                          )));
+                        },
                       );
                     },
                   )
