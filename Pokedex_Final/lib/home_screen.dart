@@ -126,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         children: [
           Positioned(
             top: 35,
-            right: 135,
+            right: 105,
             child: Image.asset('images/pokedexlogo1.png', width: 200, fit: BoxFit.fitWidth),
           ),
           Positioned(
@@ -164,7 +164,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
-                    childAspectRatio: 0.8,
+                    childAspectRatio: 0.6,
                     mainAxisSpacing: 8,
                     crossAxisSpacing: 8,
                   ),
