@@ -57,10 +57,10 @@ Ejecutar la aplicación:
 
 ### Estructura de la Aplicación
 
-lib/
+`lib/
 ├── main.dart              # Punto de entrada de la aplicación
 ├── home_screen.dart       # Pantalla principal con la lista de Pokémon y filtros
-└── pokemon_details_screen.dart # Pantalla de detalles del Pokémon
+└── pokemon_details_screen.dart # Pantalla de detalles del Pokémon`
 
 ### Detalles de la Implementación
 1. Interfaz de Usuario
