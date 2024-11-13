@@ -86,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     var width = MediaQuery.of(context).size.width;
 
     return Scaffold(
-        backgroundColor: Colors.blueGrey[900],
+      backgroundColor: Colors.blueGrey[900],
       appBar: AppBar(
         title: const Text("Pokedex"),
         actions: [
@@ -107,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           ),
           DropdownButton<int?>(
             value: selectedGeneration,
-            hint: const Text("Filtro por Generation"),
+            hint: const Text("Filtro por Generación"),
             items: generations.map((gen) {
               return DropdownMenuItem<int?>(
                 value: gen,
@@ -130,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             child: Image.asset('images/pokedexlogo1.png', width: 200, fit: BoxFit.fitWidth),
           ),
           Positioned(
-            top: 150,
+            top: 140,
             bottom: 0,
             width: width,
             child: Query(
@@ -163,10 +163,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                 return GridView.builder(
                   padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    childAspectRatio: 0.6,
-                    mainAxisSpacing: 8,
-                    crossAxisSpacing: 8,
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.8,
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 10,
                   ),
                   itemCount: filteredPokedex.length,
                   itemBuilder: (context, index) {
@@ -212,7 +212,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                     pokemon['name'],
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 16,
+                                      fontSize: 25, // Tamaño de fuente más grande para el nombre
                                       color: Colors.white,
                                     ),
                                     maxLines: 1,
@@ -234,27 +234,28 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                           padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4),
                                           child: Text(
                                             type,
-                                            style: const TextStyle(color: Colors.white, fontSize: 12),
+                                            style: const TextStyle(color: Colors.white, fontSize: 14),
                                           ),
                                         ),
                                       );
                                     }).toList(),
                                   ),
                                 ),
-                                Spacer(),
-                                Align(
-                                  alignment: Alignment.bottomRight,
-                                  child: Hero(
-                                    tag: 'pokemon_image_$index',
-                                    child: imageUrl != null
-                                        ? CachedNetworkImage(
-                                      imageUrl: imageUrl,
-                                      height: 60,
-                                      fit: BoxFit.fitHeight,
-                                      errorWidget: (context, url, error) =>
-                                      const Icon(Icons.error, color: Colors.red),
-                                    )
-                                        : const Icon(Icons.image_not_supported, color: Colors.white, size: 60),
+                                Expanded(
+                                  child: Align(
+                                    alignment: Alignment.bottomRight,
+                                    child: Hero(
+                                      tag: 'pokemon_image_$index',
+                                      child: imageUrl != null
+                                          ? CachedNetworkImage(
+                                        imageUrl: imageUrl,
+                                        height: 180, // Imagen más grande
+                                        fit: BoxFit.fitHeight,
+                                        errorWidget: (context, url, error) =>
+                                        const Icon(Icons.error, color: Colors.red),
+                                      )
+                                          : const Icon(Icons.image_not_supported, color: Colors.white, size: 80),
+                                    ),
                                   ),
                                 ),
                               ],
@@ -309,5 +310,4 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         return Colors.pink;
     }
   }
-
 }
