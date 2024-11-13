@@ -6,7 +6,7 @@ import 'dart:convert';
 
 const String getPokemonListQuery = """
   query {
-    pokemon_v2_pokemon(limit: 50) {
+    pokemon_v2_pokemon{
       name
       height
       weight
@@ -64,7 +64,7 @@ class _HomeScreenState extends State<HomeScreen> {
     'Fighting', 'Bug', 'Ghost', 'Normal', 'Poison', 'Ice', 'Dragon', 'Dark',
     'Fairy', 'Steel', 'Flying'
   ];
-  final List<int> generations = [1, 2, 3, 4, 5, 6, 7, 8];
+  final List<int?> generations = [null, 1, 2, 3, 4, 5, 6, 7, 8];
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           DropdownButton<String>(
             value: selectedType,
-            hint: const Text("Filter by Type"),
+            hint: const Text("Filtro por Tipo"),
             items: types.map((type) {
               return DropdownMenuItem<String>(
                 value: type,
@@ -89,13 +89,13 @@ class _HomeScreenState extends State<HomeScreen> {
               });
             },
           ),
-          DropdownButton<int>(
+          DropdownButton<int?>(
             value: selectedGeneration,
-            hint: const Text("Filter by Generation"),
+            hint: const Text("Filtro por Generation"),
             items: generations.map((gen) {
-              return DropdownMenuItem<int>(
+              return DropdownMenuItem<int?>(
                 value: gen,
-                child: Text("Gen $gen"),
+                child: Text(gen == null ? "Todas" : "Gen $gen"),
               );
             }).toList(),
             onChanged: (value) {
@@ -131,20 +131,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 final pokedex = result.data?['pokemon_v2_pokemon'] ?? [];
 
-                // Apply filters
+                // Filtro de Pokémon según tipo y generación
                 final filteredPokedex = pokedex.where((pokemon) {
-                  // Extract types and generation info
                   final types = (pokemon['pokemon_v2_pokemontypes'] as List)
                       .map((typeData) => (typeData['pokemon_v2_type']['name'] as String).toLowerCase())
                       .toList();
                   final generation = pokemon['pokemon_v2_pokemonspecy']?['generation_id'];
 
-                  // Check for type match and generation match
                   final typeMatches = selectedType == null || types.contains(selectedType!.toLowerCase());
                   final generationMatches = selectedGeneration == null || generation == selectedGeneration;
 
                   return typeMatches && generationMatches;
                 }).toList();
+
 
                 return SingleChildScrollView(
                   child: GridView.builder(
@@ -164,72 +163,75 @@ class _HomeScreenState extends State<HomeScreen> {
                       final spriteData = pokemon['pokemon_v2_pokemonsprites'][0]['sprites'];
                       final imageUrl = spriteData['front_default']; // Acceso directo sin json.decode
 
-
                       return InkWell(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: _getTypeColor(type),
-                              borderRadius: const BorderRadius.all(Radius.circular(20)),
-                            ),
-                            child: Stack(
-                              children: [
-                                Positioned(
-                                  top: 30,
-                                  left: 10,
-                                  child: Text(
-                                    pokemon['name'],
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ),
-                                Positioned(
-                                  top: 52,
-                                  left: 10,
-                                  child: Container(
-                                    decoration: const BoxDecoration(
-                                      borderRadius: BorderRadius.all(Radius.circular(20)),
-                                      color: Colors.black26,
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4),
-                                      child: Text(
-                                        type,
-                                        style: const TextStyle(color: Colors.white),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                Positioned(
-                                  bottom: 5,
-                                  right: 5,
-                                  child: CachedNetworkImage(
-                                    imageUrl: imageUrl,
-                                    height: 100,
-                                    fit: BoxFit.fitHeight,
-                                    errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.red),
-                                  ),
-                                ),
-                              ],
-                            ),
+                          child: AnimatedOpacity(opacity: 1.0, duration: const Duration(milliseconds: 500),
+                      child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 12),
+                      child: Container(
+                      decoration: BoxDecoration(
+                      color: _getTypeColor(type),
+                      borderRadius: const BorderRadius.all(Radius.circular(20)),
+                      ),
+                      child: Stack(
+                      children: [
+                        Positioned(
+                      top: 30,
+                      left: 10,
+                      child: Text(
+                      pokemon['name'],
+                      style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                      color: Colors.white,
+                      ),
+                      ),
+                      ),
+                      Positioned(
+                      top: 52,
+                      left: 10,
+                      child: Container(
+                      decoration: const BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
+                      color: Colors.black26,
+                      ),
+                      child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4),
+                      child: Text(
+                      type,
+                      style: const TextStyle(color: Colors.white),
+                      ),
+                      ),
+                      ),
+                      ),
+                      Positioned(
+                      bottom: 5,
+                      right: 5,
+                      child: Hero(
+                      tag: 'pokemon_image_$index',
+                      child: CachedNetworkImage(
+                      imageUrl: imageUrl,
+                      height: 100,
+                      fit: BoxFit.fitHeight,
+                      errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.red),
+                      ),
+                      ),
+                      ),
+                      ],
+                      ),
+                      ),
+                      ),
                           ),
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => PokemonDetailScreen(
-                                pokemonDetail: pokemon,
-                                color: _getTypeColor(type),
-                                heroTag: index,
-                              ),
-                            ),
-                          );
-                        },
+                      onTap: () {Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                      builder: (_) => PokemonDetailScreen(
+                      pokemonDetail: pokemon,
+                      color: _getTypeColor(type),
+                      heroTag: index,
+                      ),
+                      ),
+                      );
+                            },
                       );
                     },
                   ),

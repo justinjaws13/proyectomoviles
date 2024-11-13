@@ -18,7 +18,7 @@ class PokemonDetailScreen extends StatelessWidget {
     // Access the 'sprites' field directly as a Map
     final spriteData = pokemonDetail['pokemon_v2_pokemonsprites'];
     final imageUrl = spriteData.isNotEmpty
-        ? spriteData[0]['sprites']['front_default'] // Access front_default directly
+        ? spriteData[0]['sprites']['front_default']
         : '';
 
     // Evolution chain and current evolution details
@@ -31,8 +31,6 @@ class PokemonDetailScreen extends StatelessWidget {
     final currentIndex = evolutionNames.indexOf(currentPokemonName);
     final previousEvolution = currentIndex > 0 ? evolutionNames[currentIndex - 1] : 'None';
     final nextEvolution = currentIndex < evolutionNames.length - 1 ? evolutionNames[currentIndex + 1] : 'None';
-
-
 
     return Scaffold(
       backgroundColor: color,
