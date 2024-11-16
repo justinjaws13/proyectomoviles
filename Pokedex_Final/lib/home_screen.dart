@@ -57,7 +57,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   String? selectedType;
   int? selectedGeneration;
+  String searchQuery = "";
   late AnimationController _animationController;
+  final TextEditingController searchController = TextEditingController();
 
   final List<String> types = [
     'All', 'Grass', 'Fire', 'Water', 'Electric', 'Rock', 'Ground', 'Psychic',
@@ -83,8 +85,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    var width = MediaQuery.of(context).size.width;
-
     return Scaffold(
       backgroundColor: Colors.blueGrey[900],
       appBar: AppBar(
@@ -111,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             items: generations.map((gen) {
               return DropdownMenuItem<int?>(
                 value: gen,
-                child: Text(gen == null ? "Todas" : "Gen $gen"),
+                child: Text(gen == null ? 'All' : "Gen $gen"),
               );
             }).toList(),
             onChanged: (value) {
@@ -122,17 +122,31 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           ),
         ],
       ),
-      body: Stack(
+      body: Column(
         children: [
-          Positioned(
-            top: 35,
-            right: 105,
-            child: Image.asset('images/pokedexlogo1.png', width: 200, fit: BoxFit.fitWidth),
+          // Barra de búsqueda
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
+            child: TextField(
+              controller: searchController,
+              decoration: InputDecoration(
+                hintText: "Buscar Pokémon por nombre o número",
+                prefixIcon: const Icon(Icons.search),
+                filled: true,
+                fillColor: Colors.white,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value.toLowerCase();
+                });
+              },
+            ),
           ),
-          Positioned(
-            top: 140,
-            bottom: 0,
-            width: width,
+          Expanded(
             child: Query(
               options: QueryOptions(
                 document: gql(getPokemonListQuery),
@@ -150,7 +164,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     .cast<Map<String, dynamic>>();
 
                 // Filtro de Pokémon según tipo y generación
-                final filteredPokedex = pokedex.where((pokemon) {
+                final filteredPokedexByTypeAndGen = pokedex.where((pokemon) {
                   final types = (pokemon['pokemon_v2_pokemontypes'] as List)
                       .map((typeData) => (typeData['pokemon_v2_type']['name'] as String).toLowerCase())
                       .toList();
@@ -160,6 +174,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   final generationMatches = selectedGeneration == null || generation == selectedGeneration;
 
                   return typeMatches && generationMatches;
+                }).toList();
+
+                // Aplicar búsqueda
+                final filteredPokedex = filteredPokedexByTypeAndGen.where((pokemon) {
+                  final index = filteredPokedexByTypeAndGen.indexOf(pokemon) + 1;
+                  return searchQuery.isEmpty ||
+                      pokemon['name'].toLowerCase().contains(searchQuery) ||
+                      index.toString() == searchQuery;
                 }).toList();
 
                 return GridView.builder(
@@ -309,7 +331,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       case 'steel':
         return Colors.blueGrey;
       default:
-        return Colors.pink;
+        return Colors.pinkAccent;
     }
   }
 }
