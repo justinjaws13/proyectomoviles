@@ -2,35 +2,40 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class PokemonDetailScreen extends StatelessWidget {
-  final Map<String, dynamic> pokemonDetail;
+  final List<Map<String, dynamic>> pokemonList; // Lista completa de Pokémon
+  final int currentIndex; // Índice del Pokémon actual
   final Color color;
-  final int heroTag;
 
   const PokemonDetailScreen({
     super.key,
-    required this.pokemonDetail,
+    required this.pokemonList,
+    required this.currentIndex,
     required this.color,
-    required this.heroTag,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Access the 'sprites' field directly as a Map
+    final pokemonDetail = pokemonList[currentIndex];
+
+    // Acceder a los sprites
     final spriteData = pokemonDetail['pokemon_v2_pokemonsprites'];
     final imageUrl = spriteData.isNotEmpty
         ? spriteData[0]['sprites']['front_default']
         : '';
 
-    // Evolution chain and current evolution details
+    // Índices de navegación
+    final previousIndex = currentIndex > 0 ? currentIndex - 1 : null;
+    final nextIndex = currentIndex < pokemonList.length - 1 ? currentIndex + 1 : null;
+
+    // Datos de evolución
     final speciesData = pokemonDetail['pokemon_v2_pokemonspecy'];
     final evolutionChain = speciesData['pokemon_v2_evolutionchain']['pokemon_v2_pokemonspecies'];
     final currentPokemonName = pokemonDetail['name'];
 
-    // Determine previous and next evolutions
     final evolutionNames = evolutionChain.map((evolution) => evolution['name']).toList();
-    final currentIndex = evolutionNames.indexOf(currentPokemonName);
-    final previousEvolution = currentIndex > 0 ? evolutionNames[currentIndex - 1] : 'None';
-    final nextEvolution = currentIndex < evolutionNames.length - 1 ? evolutionNames[currentIndex + 1] : 'None';
+    final currentEvolutionIndex = evolutionNames.indexOf(currentPokemonName);
+    final previousEvolution = currentEvolutionIndex > 0 ? evolutionNames[currentEvolutionIndex - 1] : 'None';
+    final nextEvolution = currentEvolutionIndex < evolutionNames.length - 1 ? evolutionNames[currentEvolutionIndex + 1] : 'None';
 
     return Scaffold(
       backgroundColor: color,
@@ -43,7 +48,7 @@ class PokemonDetailScreen extends StatelessWidget {
         child: Column(
           children: [
             Hero(
-              tag: heroTag,
+              tag: currentIndex,
               child: CachedNetworkImage(
                 imageUrl: imageUrl,
                 height: 200,
@@ -56,6 +61,7 @@ class PokemonDetailScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Nombre del Pokémon
                   Text(
                     pokemonDetail['name'],
                     style: const TextStyle(
@@ -65,6 +71,8 @@ class PokemonDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 10),
+
+                  // Altura y peso
                   Text(
                     "Height: ${pokemonDetail['height']}",
                     style: const TextStyle(fontSize: 16, color: Colors.white),
@@ -74,18 +82,41 @@ class PokemonDetailScreen extends StatelessWidget {
                     style: const TextStyle(fontSize: 16, color: Colors.white),
                   ),
                   const SizedBox(height: 20),
-                  buildSection("Types", pokemonDetail['pokemon_v2_pokemontypes']
-                      .map((type) => type['pokemon_v2_type']['name'])
-                      .join(', ')),
-                  buildSection("Abilities", pokemonDetail['pokemon_v2_pokemonabilities']
-                      .map((ability) => ability['pokemon_v2_ability']['name'])
-                      .join(', ')),
-                  buildSection("Stats", pokemonDetail['pokemon_v2_pokemonstats']
-                      .map((stat) => "${stat['pokemon_v2_stat']['name']}: ${stat['base_stat']}")
-                      .join(', ')),
-                  buildSection("Moves", pokemonDetail['pokemon_v2_pokemonmoves']
-                      .map((move) => move['pokemon_v2_move']['name'])
-                      .join(', ')),
+
+                  // Tipos
+                  buildSection(
+                    "Types",
+                    pokemonDetail['pokemon_v2_pokemontypes']
+                        .map((type) => type['pokemon_v2_type']['name'])
+                        .join(', '),
+                  ),
+
+                  // Habilidades
+                  buildSection(
+                    "Abilities",
+                    pokemonDetail['pokemon_v2_pokemonabilities']
+                        .map((ability) => ability['pokemon_v2_ability']['name'])
+                        .join(', '),
+                  ),
+
+                  // Estadísticas
+                  buildSection(
+                    "Stats",
+                    pokemonDetail['pokemon_v2_pokemonstats']
+                        .map((stat) =>
+                    "${stat['pokemon_v2_stat']['name']}: ${stat['base_stat']}")
+                        .join(', '),
+                  ),
+
+                  // Movimientos
+                  buildSection(
+                    "Moves",
+                    pokemonDetail['pokemon_v2_pokemonmoves']
+                        .map((move) => move['pokemon_v2_move']['name'])
+                        .join(', '),
+                  ),
+
+                  // Evoluciones
                   buildSection("Previous Evolution", previousEvolution),
                   buildSection("Next Evolution", nextEvolution),
                 ],
@@ -93,6 +124,49 @@ class PokemonDetailScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          if (previousIndex != null)
+            TextButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PokemonDetailScreen(
+                      pokemonList: pokemonList,
+                      currentIndex: previousIndex,
+                      color: color,
+                    ),
+                  ),
+                );
+              },
+              child: const Text(
+                "Previous",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          if (nextIndex != null)
+            TextButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => PokemonDetailScreen(
+                      pokemonList: pokemonList,
+                      currentIndex: nextIndex,
+                      color: color,
+                    ),
+                  ),
+                );
+              },
+              child: const Text(
+                "Next",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+        ],
       ),
     );
   }

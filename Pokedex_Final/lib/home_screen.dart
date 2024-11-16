@@ -145,7 +145,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   return Center(child: Text('Error al cargar datos: ${result.exception.toString()}'));
                 }
 
-                final pokedex = result.data?['pokemon_v2_pokemon'] ?? [];
+                // Asegúrate de castear los datos para evitar problemas de tipo
+                final pokedex = (result.data?['pokemon_v2_pokemon'] as List)
+                    .cast<Map<String, dynamic>>();
 
                 // Filtro de Pokémon según tipo y generación
                 final filteredPokedex = pokedex.where((pokemon) {
@@ -188,9 +190,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                             context,
                             MaterialPageRoute(
                               builder: (_) => PokemonDetailScreen(
-                                pokemonDetail: pokemon,
+                                pokemonList: filteredPokedex, // Pasa la lista completa de Pokémon
+                                currentIndex: index, // Pasa el índice del Pokémon actual
                                 color: _getTypeColor(types[0]),
-                                heroTag: index,
                               ),
                             ),
                           );
@@ -212,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                     pokemon['name'],
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      fontSize: 25, // Tamaño de fuente más grande para el nombre
+                                      fontSize: 20, // Ajuste del tamaño de fuente
                                       color: Colors.white,
                                     ),
                                     maxLines: 1,
@@ -249,7 +251,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                       child: imageUrl != null
                                           ? CachedNetworkImage(
                                         imageUrl: imageUrl,
-                                        height: 180, // Imagen más grande
+                                        height: 120,
                                         fit: BoxFit.fitHeight,
                                         errorWidget: (context, url, error) =>
                                         const Icon(Icons.error, color: Colors.red),
