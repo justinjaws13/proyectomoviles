@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'pokemon_details_screen.dart';
 
+// Consulta GraphQL
 const String getPokemonListQuery = """
   query {
     pokemon_v2_pokemon(order_by: {id: asc}) {
@@ -59,17 +60,16 @@ const Map<String, IconData> _typeIcons = {
   'psychic': Icons.psychology,
   'fighting': Icons.sports_mma,
   'bug': Icons.bug_report,
-  'ghost': FontAwesomeIcons.ghost, // Usando FontAwesome para Ghost
+  'ghost': FontAwesomeIcons.ghost,
   'normal': Icons.circle,
   'poison': Icons.science,
   'ice': Icons.ac_unit,
-  'dark': FontAwesomeIcons.moon, // Usando un ícono de luna para Dark
-  'steel': FontAwesomeIcons.screwdriver, // Usando FontAwesome para Steel
-  'dragon': FontAwesomeIcons.dragon, // Usando FontAwesome para Dragon
-  'fairy': FontAwesomeIcons.wandMagic, // Usando FontAwesome para Fairy
-  'flying': FontAwesomeIcons.feather, // Usando FontAwesome para Flying
+  'dark': FontAwesomeIcons.moon,
+  'steel': FontAwesomeIcons.screwdriver,
+  'dragon': FontAwesomeIcons.dragon,
+  'fairy': FontAwesomeIcons.wandMagic,
+  'flying': FontAwesomeIcons.feather,
 };
-
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -83,6 +83,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   int? selectedGeneration;
   String searchQuery = "";
   late AnimationController _animationController;
+  final ScrollController _scrollController = ScrollController(); // Inicialización directa
   final TextEditingController searchController = TextEditingController();
 
   final List<String> types = [
@@ -103,6 +104,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   @override
   void dispose() {
+    _scrollController.dispose(); // Limpia el controlador para evitar fugas de memoria
     _animationController.dispose();
     super.dispose();
   }
@@ -112,12 +114,26 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     return Scaffold(
       backgroundColor: Colors.blueGrey[900],
       appBar: AppBar(
-        title: const Text("Pokédex", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+        title: GestureDetector(
+          onTap: () {
+            // Acción al tocar "Pokédex": hace scroll hacia arriba
+            _scrollController.animateTo(
+              0.0,
+              duration: const Duration(milliseconds: 500),
+              curve: Curves.easeInOut,
+            );
+          },
+          child: const Text(
+            "Pokédex",
+            style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+          ),
+        ),
         centerTitle: true,
       ),
       body: Column(
         children: [
           const SizedBox(height: 10),
+          // Barra de búsqueda y filtros
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
             child: Column(
@@ -148,21 +164,18 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       value: selectedType,
                       hint: const Text("Tipo"),
                       items: types.map((type) {
-                        final typeKey = type.toLowerCase(); // Convertir a minúscula para el mapa
+                        final typeKey = type.toLowerCase();
                         return DropdownMenuItem<String>(
                           value: type,
                           child: Row(
                             children: [
                               Icon(
-                                _typeIcons[typeKey] ?? Icons.help, // Icono del tipo o un ícono de ayuda predeterminado
+                                _typeIcons[typeKey] ?? Icons.help,
                                 color: Colors.blueGrey[900],
                                 size: 20,
                               ),
-                              const SizedBox(width: 8), // Espaciado entre el icono y el texto
-                              Text(
-                                type,
-                                style: const TextStyle(fontSize: 16),
-                              ),
+                              const SizedBox(width: 8),
+                              Text(type, style: const TextStyle(fontSize: 16)),
                             ],
                           ),
                         );
@@ -172,11 +185,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                           selectedType = value == 'All' ? null : value;
                         });
                       },
-                      dropdownColor: Colors.white, // Color del menú desplegable
-                      icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
-                      style: const TextStyle(color: Colors.black, fontSize: 16),
                     ),
-
                     DropdownButton<int?>(
                       value: selectedGeneration,
                       hint: const Text("Generación"),
@@ -213,9 +222,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
                 final pokedex = (result.data?['pokemon_v2_pokemon'] as List?)
                     ?.cast<Map<String, dynamic>>() ??
-                    []; // Evita errores en caso de datos null
+                    [];
 
-                // Filtro de Pokémon según tipo y generación
+                // Filtro de Pokémon
                 final filteredPokedexByTypeAndGen = pokedex.where((pokemon) {
                   final types = (pokemon['pokemon_v2_pokemontypes'] as List?)
                       ?.map((typeData) =>
@@ -224,34 +233,36 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       [];
                   final generation = pokemon['pokemon_v2_pokemonspecy']?['generation_id'];
 
-                  final typeMatches = selectedType == null || types.contains(selectedType!.toLowerCase());
-                  final generationMatches = selectedGeneration == null || generation == selectedGeneration;
-
+                  final typeMatches = selectedType == null ||
+                      types.contains(selectedType!.toLowerCase());
+                  final generationMatches = selectedGeneration == null ||
+                      generation == selectedGeneration;
 
                   return typeMatches && generationMatches;
                 }).toList();
 
                 // Aplicar búsqueda
                 final filteredPokedex = filteredPokedexByTypeAndGen.where((pokemon) {
-                  final index = filteredPokedexByTypeAndGen.indexOf(pokemon) + 1;
+                  final index = pokedex.indexOf(pokemon) + 1;
+                  final name = (pokemon['name'] as String).toLowerCase();
+
                   return searchQuery.isEmpty ||
-                      pokemon['name'].toLowerCase().contains(searchQuery) ||
+                      name.contains(searchQuery) ||
                       index.toString() == searchQuery;
                 }).toList();
 
                 return GridView.builder(
+                  controller: _scrollController,
                   padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    childAspectRatio: 0.8,
+                    childAspectRatio: 0.9, // Tamaño más proporcional
                     mainAxisSpacing: 10,
                     crossAxisSpacing: 10,
                   ),
                   itemCount: filteredPokedex.length,
                   itemBuilder: (context, index) {
                     final pokemon = filteredPokedex[index];
-
-                    // Manejo seguro de datos
                     final types = (pokemon['pokemon_v2_pokemontypes'] as List?)
                         ?.map((typeData) => typeData['pokemon_v2_type']['name'] as String)
                         .toList() ??
@@ -259,7 +270,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
                     final spriteData = pokemon['pokemon_v2_pokemonsprites']?.first['sprites'];
                     final imageUrl = spriteData != null ? spriteData['front_default'] : null;
-
 
                     return GestureDetector(
                       onTap: () {
@@ -285,13 +295,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                             end: Alignment.bottomRight,
                           ),
                           borderRadius: const BorderRadius.all(Radius.circular(20)),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              offset: const Offset(2, 4),
-                              blurRadius: 6,
-                            ),
-                          ],
                         ),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
@@ -300,13 +303,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                             Padding(
                               padding: const EdgeInsets.only(top: 10, left: 10),
                               child: Text(
-                                pokemon['name'],
+                                pokemon['name'].toUpperCase(),
                                 style: const TextStyle(
+                                  fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  fontSize: 20,
                                   color: Colors.white,
                                 ),
-                                maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
@@ -314,30 +316,19 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                               padding: const EdgeInsets.only(left: 10, bottom: 5),
                               child: Row(
                                 children: types.map((type) {
-                                  return Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                                    child: Icon(
-                                      _typeIcons[type.toLowerCase()] ?? Icons.help,
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
+                                  return Icon(
+                                    _typeIcons[type.toLowerCase()] ?? Icons.help,
+                                    color: Colors.white,
+                                    size: 18,
                                   );
                                 }).toList(),
                               ),
                             ),
                             Expanded(
-                              child: Align(
-                                alignment: Alignment.bottomRight,
+                              child: Center(
                                 child: imageUrl != null
-                                    ? CachedNetworkImage(
-                                  imageUrl: imageUrl,
-                                  height: 120,
-                                  fit: BoxFit.fitHeight,
-                                  errorWidget: (context, url, error) =>
-                                  const Icon(Icons.error, color: Colors.red),
-                                )
-                                    : const Icon(Icons.image_not_supported,
-                                    color: Colors.white, size: 80),
+                                    ? CachedNetworkImage(imageUrl: imageUrl)
+                                    : const Icon(Icons.image_not_supported, color: Colors.white),
                               ),
                             ),
                           ],
