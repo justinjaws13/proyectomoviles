@@ -267,7 +267,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                           context,
                           MaterialPageRoute(
                             builder: (_) => PokemonDetailScreen(
-                              pokemonList: pokedex,
+                              fullPokedex: pokedex,
+                              filteredPokedex: filteredPokedex,
                               currentIndex: index,
                             ),
                           ),
