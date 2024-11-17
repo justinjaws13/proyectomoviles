@@ -4,13 +4,11 @@ import 'package:cached_network_image/cached_network_image.dart';
 class PokemonDetailScreen extends StatelessWidget {
   final List<Map<String, dynamic>> pokemonList; // Lista completa de Pokémon
   final int currentIndex; // Índice del Pokémon actual
-  final Color color;
 
   const PokemonDetailScreen({
     super.key,
     required this.pokemonList,
     required this.currentIndex,
-    required this.color,
   });
 
   @override
@@ -19,21 +17,37 @@ class PokemonDetailScreen extends StatelessWidget {
 
     // Acceder a los sprites
     final spriteData = pokemonDetail['pokemon_v2_pokemonsprites'];
-    final imageUrl = spriteData.isNotEmpty
+    final imageUrl = (spriteData.isNotEmpty && spriteData[0]['sprites'] != null
         ? spriteData[0]['sprites']['front_default']
-        : '';
+        : '')?.toString() ?? '';
 
     // Cadena evolutiva completa
     final speciesData = pokemonDetail['pokemon_v2_pokemonspecy'];
     final evolutionChain = speciesData['pokemon_v2_evolutionchain']['pokemon_v2_pokemonspecies'];
 
-    // Obtener información de todas las evoluciones
-    final allEvolutions = evolutionChain.map((evolution) {
-      final evolutionName = evolution['name'];
-      final evolutionImage = pokemonList
-          .firstWhere((pokemon) => pokemon['name'] == evolutionName)['pokemon_v2_pokemonsprites'][0]['sprites']['front_default'];
+    final allEvolutions = evolutionChain.map<Map<String, String>>((evolution) {
+      final evolutionName = (evolution['name'] ?? 'Unknown').toString();
+
+      // Find the corresponding Pokémon safely
+      final matchedPokemon = pokemonList.firstWhere(
+            (pokemon) => pokemon['name'] == evolutionName,
+        orElse: () => {},
+      );
+
+      // Get the sprite URL, ensuring it's a string
+      final evolutionImage = matchedPokemon.isNotEmpty &&
+          matchedPokemon['pokemon_v2_pokemonsprites'] != null &&
+          matchedPokemon['pokemon_v2_pokemonsprites'][0]['sprites'] != null
+          ? (matchedPokemon['pokemon_v2_pokemonsprites'][0]['sprites']['front_default'] ?? '').toString()
+          : '';
+
       return {'name': evolutionName, 'imageUrl': evolutionImage};
     }).toList();
+
+    // Obtener el color basado en el tipo del Pokémon actual
+    final pokemonType = pokemonDetail['pokemon_v2_pokemontypes'][0]['pokemon_v2_type']['name'];
+    final color = _getTypeColor(pokemonType);
+
 
     return Scaffold(
       backgroundColor: Colors.blueGrey[800],
@@ -123,7 +137,6 @@ class PokemonDetailScreen extends StatelessWidget {
                                 builder: (_) => PokemonDetailScreen(
                                   pokemonList: pokemonList,
                                   currentIndex: targetIndex,
-                                  color: color,
                                 ),
                               ),
                             );
@@ -163,7 +176,6 @@ class PokemonDetailScreen extends StatelessWidget {
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
               ),
             ),
-            // Habilitar desplazamiento horizontal con SingleChildScrollView
             SizedBox(
               height: 120,
               child: ListView.builder(
@@ -181,7 +193,6 @@ class PokemonDetailScreen extends StatelessWidget {
                           builder: (_) => PokemonDetailScreen(
                             pokemonList: pokemonList,
                             currentIndex: index,
-                            color: color,
                           ),
                         ),
                       );
@@ -233,5 +244,41 @@ class PokemonDetailScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+Color _getTypeColor(String type) {
+  switch (type) {
+    case 'grass':
+      return Colors.greenAccent;
+    case 'fire':
+      return Colors.redAccent;
+    case 'water':
+      return Colors.blue;
+    case 'electric':
+      return Colors.yellowAccent;
+    case 'rock':
+      return Colors.grey;
+    case 'ground':
+      return Colors.brown;
+    case 'psychic':
+      return Colors.indigo;
+    case 'fighting':
+      return Colors.orangeAccent;
+    case 'bug':
+      return Colors.lightGreenAccent;
+    case 'ghost':
+      return Colors.deepPurple;
+    case 'normal':
+      return Colors.black26;
+    case 'poison':
+      return Colors.deepPurpleAccent;
+    case 'ice':
+      return Colors.lightBlueAccent;
+    case 'dark':
+      return Colors.black87;
+    case 'steel':
+      return Colors.blueGrey;
+    default:
+      return Colors.pinkAccent;
   }
 }

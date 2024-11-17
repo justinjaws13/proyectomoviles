@@ -1,20 +1,21 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'pokemon_details_screen.dart';
 
 const String getPokemonListQuery = """
   query {
-    pokemon_v2_pokemon{
+    pokemon_v2_pokemon(order_by: {id: asc}) {
+      id
       name
       height
       weight
       pokemon_v2_pokemonspecy {
         generation_id
-        evolution_chain_id
         evolves_from_species_id
         pokemon_v2_evolutionchain {
-          pokemon_v2_pokemonspecies {
+          pokemon_v2_pokemonspecies(order_by: {id: asc}) {
             name
           }
         }
@@ -46,6 +47,29 @@ const String getPokemonListQuery = """
     }
   }
 """;
+
+// Iconos para los tipos de Pokémon
+const Map<String, IconData> _typeIcons = {
+  'grass': Icons.grass,
+  'fire': Icons.local_fire_department,
+  'water': Icons.water_drop,
+  'electric': Icons.flash_on,
+  'rock': Icons.terrain_outlined,
+  'ground': Icons.landscape,
+  'psychic': Icons.psychology,
+  'fighting': Icons.sports_mma,
+  'bug': Icons.bug_report,
+  'ghost': FontAwesomeIcons.ghost, // Usando FontAwesome para Ghost
+  'normal': Icons.circle,
+  'poison': Icons.science,
+  'ice': Icons.ac_unit,
+  'dark': FontAwesomeIcons.moon, // Usando un ícono de luna para Dark
+  'steel': FontAwesomeIcons.screwdriver, // Usando FontAwesome para Steel
+  'dragon': FontAwesomeIcons.dragon, // Usando FontAwesome para Dragon
+  'fairy': FontAwesomeIcons.wandMagic, // Usando FontAwesome para Fairy
+  'flying': FontAwesomeIcons.feather, // Usando FontAwesome para Flying
+};
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -88,64 +112,92 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     return Scaffold(
       backgroundColor: Colors.blueGrey[900],
       appBar: AppBar(
-        title: const Text("Pokedex"),
-        actions: [
-          DropdownButton<String>(
-            value: selectedType,
-            hint: const Text("Filtro por Tipo"),
-            items: types.map((type) {
-              return DropdownMenuItem<String>(
-                value: type,
-                child: Text(type),
-              );
-            }).toList(),
-            onChanged: (value) {
-              setState(() {
-                selectedType = value == 'All' ? null : value;
-              });
-            },
-          ),
-          DropdownButton<int?>(
-            value: selectedGeneration,
-            hint: const Text("Filtro por Generación"),
-            items: generations.map((gen) {
-              return DropdownMenuItem<int?>(
-                value: gen,
-                child: Text(gen == null ? 'All' : "Gen $gen"),
-              );
-            }).toList(),
-            onChanged: (value) {
-              setState(() {
-                selectedGeneration = value;
-              });
-            },
-          ),
-        ],
+        title: const Text("Pokédex", style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
+        centerTitle: true,
       ),
       body: Column(
         children: [
-          // Barra de búsqueda
+          const SizedBox(height: 10),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8.0),
-            child: TextField(
-              controller: searchController,
-              decoration: InputDecoration(
-                hintText: "Buscar Pokémon por nombre o número",
-                prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide.none,
+            padding: const EdgeInsets.symmetric(horizontal: 10.0),
+            child: Column(
+              children: [
+                TextField(
+                  controller: searchController,
+                  decoration: InputDecoration(
+                    hintText: "Buscar Pokémon por nombre o número",
+                    prefixIcon: const Icon(Icons.search),
+                    filled: true,
+                    fillColor: Colors.white,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(20),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      searchQuery = value.toLowerCase();
+                    });
+                  },
                 ),
-              ),
-              onChanged: (value) {
-                setState(() {
-                  searchQuery = value.toLowerCase();
-                });
-              },
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    DropdownButton<String>(
+                      value: selectedType,
+                      hint: const Text("Tipo"),
+                      items: types.map((type) {
+                        final typeKey = type.toLowerCase(); // Convertir a minúscula para el mapa
+                        return DropdownMenuItem<String>(
+                          value: type,
+                          child: Row(
+                            children: [
+                              Icon(
+                                _typeIcons[typeKey] ?? Icons.help, // Icono del tipo o un ícono de ayuda predeterminado
+                                color: Colors.blueGrey[900],
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8), // Espaciado entre el icono y el texto
+                              Text(
+                                type,
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedType = value == 'All' ? null : value;
+                        });
+                      },
+                      dropdownColor: Colors.white, // Color del menú desplegable
+                      icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+                      style: const TextStyle(color: Colors.black, fontSize: 16),
+                    ),
+
+                    DropdownButton<int?>(
+                      value: selectedGeneration,
+                      hint: const Text("Generación"),
+                      items: generations.map((gen) {
+                        return DropdownMenuItem<int?>(
+                          value: gen,
+                          child: Text(gen == null ? 'Gen' : "Gen $gen"),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedGeneration = value;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
+          const SizedBox(height: 10),
           Expanded(
             child: Query(
               options: QueryOptions(
@@ -159,19 +211,22 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   return Center(child: Text('Error al cargar datos: ${result.exception.toString()}'));
                 }
 
-                // Asegúrate de castear los datos para evitar problemas de tipo
-                final pokedex = (result.data?['pokemon_v2_pokemon'] as List)
-                    .cast<Map<String, dynamic>>();
+                final pokedex = (result.data?['pokemon_v2_pokemon'] as List?)
+                    ?.cast<Map<String, dynamic>>() ??
+                    []; // Evita errores en caso de datos null
 
                 // Filtro de Pokémon según tipo y generación
                 final filteredPokedexByTypeAndGen = pokedex.where((pokemon) {
-                  final types = (pokemon['pokemon_v2_pokemontypes'] as List)
-                      .map((typeData) => (typeData['pokemon_v2_type']['name'] as String).toLowerCase())
-                      .toList();
+                  final types = (pokemon['pokemon_v2_pokemontypes'] as List?)
+                      ?.map((typeData) =>
+                      (typeData['pokemon_v2_type']['name'] as String).toLowerCase())
+                      .toList() ??
+                      [];
                   final generation = pokemon['pokemon_v2_pokemonspecy']?['generation_id'];
 
                   final typeMatches = selectedType == null || types.contains(selectedType!.toLowerCase());
                   final generationMatches = selectedGeneration == null || generation == selectedGeneration;
+
 
                   return typeMatches && generationMatches;
                 }).toList();
@@ -196,95 +251,95 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   itemBuilder: (context, index) {
                     final pokemon = filteredPokedex[index];
 
-                    // Obtener todos los tipos de Pokémon
-                    final types = (pokemon['pokemon_v2_pokemontypes'] as List)
-                        .map((typeData) => typeData['pokemon_v2_type']['name'] as String)
-                        .toList();
+                    // Manejo seguro de datos
+                    final types = (pokemon['pokemon_v2_pokemontypes'] as List?)
+                        ?.map((typeData) => typeData['pokemon_v2_type']['name'] as String)
+                        .toList() ??
+                        ['Unknown'];
 
-                    final spriteData = pokemon['pokemon_v2_pokemonsprites'][0]['sprites'];
+                    final spriteData = pokemon['pokemon_v2_pokemonsprites']?.first['sprites'];
                     final imageUrl = spriteData != null ? spriteData['front_default'] : null;
 
-                    return FadeTransition(
-                      opacity: _animationController,
-                      child: InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => PokemonDetailScreen(
-                                pokemonList: filteredPokedex, // Pasa la lista completa de Pokémon
-                                currentIndex: index, // Pasa el índice del Pokémon actual
-                                color: _getTypeColor(types[0]),
-                              ),
-                            ),
-                          );
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(6.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: _getTypeColor(types[0]),
-                              borderRadius: const BorderRadius.all(Radius.circular(20)),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 10, left: 10),
-                                  child: Text(
-                                    pokemon['name'],
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 20, // Ajuste del tamaño de fuente
-                                      color: Colors.white,
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 10, bottom: 5),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: types.map((type) {
-                                      return Container(
-                                        margin: const EdgeInsets.only(bottom: 4.0),
-                                        decoration: const BoxDecoration(
-                                          borderRadius: BorderRadius.all(Radius.circular(20)),
-                                          color: Colors.black26,
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4),
-                                          child: Text(
-                                            type,
-                                            style: const TextStyle(color: Colors.white, fontSize: 14),
-                                          ),
-                                        ),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Align(
-                                    alignment: Alignment.bottomRight,
-                                    child: Hero(
-                                      tag: 'pokemon_image_$index',
-                                      child: imageUrl != null
-                                          ? CachedNetworkImage(
-                                        imageUrl: imageUrl,
-                                        height: 120,
-                                        fit: BoxFit.fitHeight,
-                                        errorWidget: (context, url, error) =>
-                                        const Icon(Icons.error, color: Colors.red),
-                                      )
-                                          : const Icon(Icons.image_not_supported, color: Colors.white, size: 80),
-                                    ),
-                                  ),
-                                ),
-                              ],
+
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => PokemonDetailScreen(
+                              pokemonList: pokedex,
+                              currentIndex: index,
                             ),
                           ),
+                        );
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              _getTypeColor(types.first).withOpacity(0.8),
+                              _getTypeColor(types.first).withOpacity(0.4),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: const BorderRadius.all(Radius.circular(20)),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              offset: const Offset(2, 4),
+                              blurRadius: 6,
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10, left: 10),
+                              child: Text(
+                                pokemon['name'],
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                  color: Colors.white,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 10, bottom: 5),
+                              child: Row(
+                                children: types.map((type) {
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                    child: Icon(
+                                      _typeIcons[type.toLowerCase()] ?? Icons.help,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                            ),
+                            Expanded(
+                              child: Align(
+                                alignment: Alignment.bottomRight,
+                                child: imageUrl != null
+                                    ? CachedNetworkImage(
+                                  imageUrl: imageUrl,
+                                  height: 120,
+                                  fit: BoxFit.fitHeight,
+                                  errorWidget: (context, url, error) =>
+                                  const Icon(Icons.error, color: Colors.red),
+                                )
+                                    : const Icon(Icons.image_not_supported,
+                                    color: Colors.white, size: 80),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     );
