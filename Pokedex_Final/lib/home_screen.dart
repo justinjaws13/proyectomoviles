@@ -104,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   @override
   void dispose() {
-    _scrollController.dispose(); // Limpia el controlador para evitar fugas de memoria
+    _scrollController.dispose(); // esto limpia el controlador para evitar fugas de memoria
     _animationController.dispose();
     super.dispose();
   }
