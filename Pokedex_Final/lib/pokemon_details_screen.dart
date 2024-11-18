@@ -39,6 +39,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
     // Cadena evolutiva completa (usando la lista completa de Pokémon)
     final speciesData = pokemonDetail['pokemon_v2_pokemonspecy'];
     final evolutionChain = speciesData['pokemon_v2_evolutionchain']['pokemon_v2_pokemonspecies'];
+
     final allEvolutions = evolutionChain.map<Map<String, String>>((evolution) {
       final evolutionName = (evolution['name'] ?? 'Unknown').toString();
 
@@ -197,51 +198,51 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                 ),
               ),
               // Lista de Pokémon (barra horizontal)
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text(
-                  "All Pokémon",
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-                ),
-              ),
-              SizedBox(
-                height: 120,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: widget.filteredPokedex.length,
-                  itemBuilder: (context, index) {
-                    final otherPokemon = widget.filteredPokedex[index];
-                    final otherImageUrl = otherPokemon['pokemon_v2_pokemonsprites'][0]['sprites']['front_default'];
-
-                    return GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          currentIndex = index;
-                        });
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: Column(
-                          children: [
-                            CachedNetworkImage(
-                              imageUrl: otherImageUrl,
-                              height: 80,
-                              errorWidget: (context, url, error) =>
-                              const Icon(Icons.error, color: Colors.red),
-                            ),
-                            const SizedBox(height: 5),
-                            Text(
-                              otherPokemon['name'],
-                              style: const TextStyle(color: Colors.white, fontSize: 12),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
+              // const Padding(
+              //   padding: EdgeInsets.all(16.0),
+              //   child: Text(
+              //     "All Pokémon",
+              //     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+              //   ),
+              // ),
+              // SizedBox(
+              //   height: 120,
+              //   child: ListView.builder(
+              //     scrollDirection: Axis.horizontal,
+              //     itemCount: widget.filteredPokedex.length,
+              //     itemBuilder: (context, index) {
+              //       final otherPokemon = widget.filteredPokedex[index];
+              //       final otherImageUrl = otherPokemon['pokemon_v2_pokemonsprites'][0]['sprites']['front_default'];
+              //
+              //       return GestureDetector(
+              //         onTap: () {
+              //           setState(() {
+              //             currentIndex = index;
+              //           });
+              //         },
+              //         child: Padding(
+              //           padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              //           child: Column(
+              //             children: [
+              //               CachedNetworkImage(
+              //                 imageUrl: otherImageUrl,
+              //                 height: 80,
+              //                 errorWidget: (context, url, error) =>
+              //                 const Icon(Icons.error, color: Colors.red),
+              //               ),
+              //               const SizedBox(height: 5),
+              //               Text(
+              //                 otherPokemon['name'],
+              //                 style: const TextStyle(color: Colors.white, fontSize: 12),
+              //                 overflow: TextOverflow.ellipsis,
+              //               ),
+              //             ],
+              //           ),
+              //         ),
+              //       );
+              //     },
+              //   ),
+              // ),
             ],
           ),
         ),
