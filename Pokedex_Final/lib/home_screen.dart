@@ -3,53 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'pokemon_details_screen.dart';
+import 'queries/graphql_queries.dart'; // Importamos la consulta GraphQL
 
-// Consulta GraphQL
-const String getPokemonListQuery = """
-  query {
-    pokemon_v2_pokemon(order_by: {id: asc}) {
-      id
-      name
-      height
-      weight
-      pokemon_v2_pokemonspecy {
-        generation_id
-        evolves_from_species_id
-        pokemon_v2_evolutionchain {
-          pokemon_v2_pokemonspecies(order_by: {id: asc}) {
-            name
-          }
-        }
-      }
-      pokemon_v2_pokemontypes {
-        pokemon_v2_type {
-          name
-        }
-      }
-      pokemon_v2_pokemonabilities {
-        pokemon_v2_ability {
-          name
-        }
-      }
-      pokemon_v2_pokemonstats {
-        base_stat
-        pokemon_v2_stat {
-          name
-        }
-      }
-      pokemon_v2_pokemonmoves(limit: 5) {  
-        pokemon_v2_move {
-          name
-        }
-      }
-      pokemon_v2_pokemonsprites {
-        sprites
-      }
-    }
-  }
-""";
-
-// Iconos para los tipos de Pokémon
 const Map<String, IconData> _typeIcons = {
   'grass': Icons.grass,
   'fire': Icons.local_fire_department,
@@ -83,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   int? selectedGeneration;
   String searchQuery = "";
   late AnimationController _animationController;
-  final ScrollController _scrollController = ScrollController(); // Inicialización directa
+  final ScrollController _scrollController = ScrollController();
   final TextEditingController searchController = TextEditingController();
 
   final List<String> types = [
@@ -104,7 +59,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   @override
   void dispose() {
-    _scrollController.dispose(); // esto limpia el controlador para evitar fugas de memoria
+    _scrollController.dispose();
     _animationController.dispose();
     super.dispose();
   }
@@ -116,7 +71,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       appBar: AppBar(
         title: GestureDetector(
           onTap: () {
-            // Acción al tocar "Pokédex": hace scroll hacia arriba
             _scrollController.animateTo(
               0.0,
               duration: const Duration(milliseconds: 500),
@@ -133,7 +87,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       body: Column(
         children: [
           const SizedBox(height: 10),
-          // Barra de búsqueda y filtros
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
             child: Column(
@@ -166,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       items: types.map((type) {
                         final typeKey = type.toLowerCase();
                         return DropdownMenuItem<String>(
-                          value: type,
+                          value: type.toLowerCase(), // Asegúrate de usar valores consistentes
                           child: Row(
                             children: [
                               Icon(
@@ -182,10 +135,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       }).toList(),
                       onChanged: (value) {
                         setState(() {
-                          selectedType = value == 'All' ? null : value;
+                          selectedType = value == 'all' ? null : value; // Convertimos "all" a `null`
                         });
                       },
                     ),
+
                     DropdownButton<int?>(
                       value: selectedGeneration,
                       hint: const Text("Generación"),
@@ -201,6 +155,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         });
                       },
                     ),
+
                   ],
                 ),
               ],
@@ -210,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           Expanded(
             child: Query(
               options: QueryOptions(
-                document: gql(getPokemonListQuery),
+                document: gql(getPokemonListQuery), // usando la consulta
               ),
               builder: (QueryResult result, {fetchMore, refetch}) {
                 if (result.isLoading) {
@@ -224,31 +179,25 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     ?.cast<Map<String, dynamic>>() ??
                     [];
 
-                // Filtro de Pokémon
-                final filteredPokedexByTypeAndGen = pokedex.where((pokemon) {
+                // Filtro
+                final filteredPokedex = pokedex.where((pokemon) {
+                  // Filtro por tipo
                   final types = (pokemon['pokemon_v2_pokemontypes'] as List?)
                       ?.map((typeData) =>
                       (typeData['pokemon_v2_type']['name'] as String).toLowerCase())
                       .toList() ??
                       [];
                   final generation = pokemon['pokemon_v2_pokemonspecy']?['generation_id'];
-
-                  final typeMatches = selectedType == null ||
-                      types.contains(selectedType!.toLowerCase());
-                  final generationMatches = selectedGeneration == null ||
-                      generation == selectedGeneration;
-
-                  return typeMatches && generationMatches;
-                }).toList();
-
-                // Aplicar búsqueda
-                final filteredPokedex = filteredPokedexByTypeAndGen.where((pokemon) {
-                  final index = pokedex.indexOf(pokemon) + 1;
                   final name = (pokemon['name'] as String).toLowerCase();
 
-                  return searchQuery.isEmpty ||
+                  final matchesType = selectedType == null || types.contains(selectedType);
+                  final matchesGeneration =
+                      selectedGeneration == null || generation == selectedGeneration;
+                  final matchesSearch = searchQuery.isEmpty ||
                       name.contains(searchQuery) ||
-                      index.toString() == searchQuery;
+                      pokemon['id'].toString() == searchQuery;
+
+                  return matchesType && matchesGeneration && matchesSearch;
                 }).toList();
 
                 return GridView.builder(
@@ -256,7 +205,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    childAspectRatio: 0.9, // Tamaño más proporcional
+                    childAspectRatio: 0.9,
                     mainAxisSpacing: 10,
                     crossAxisSpacing: 10,
                   ),
@@ -327,8 +276,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                             Expanded(
                               child: Center(
                                 child: imageUrl != null
-                                    ? CachedNetworkImage(imageUrl: imageUrl)
-                                    : const Icon(Icons.image_not_supported, color: Colors.white),
+                                    ? CachedNetworkImage(imageUrl: imageUrl, height: 170, fit: BoxFit.contain, )
+                                    : const Icon(Icons.image_not_supported, color: Colors.white, size: 100,),
                               ),
                             ),
                           ],
