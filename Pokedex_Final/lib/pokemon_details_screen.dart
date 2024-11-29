@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Para persistencia
 
 class PokemonDetailScreen extends StatefulWidget {
   final List<Map<String, dynamic>> fullPokedex; // Lista completa de Pokémon
   final List<Map<String, dynamic>> filteredPokedex; // Lista filtrada
   final int currentIndex;
+  final Set<int> favoritePokemonIds;
+  final Function(int) onFavoriteToggle; // Lista de IDs de Pokémon favoritos
 
   const PokemonDetailScreen({
     super.key,
     required this.fullPokedex,
     required this.filteredPokedex,
     required this.currentIndex,
+    required this.favoritePokemonIds,
+    required this.onFavoriteToggle,
   });
 
   @override
@@ -19,11 +24,40 @@ class PokemonDetailScreen extends StatefulWidget {
 
 class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
   late int currentIndex;
+  late bool isFavorite;
 
   @override
   void initState() {
     super.initState();
     currentIndex = widget.currentIndex;
+    _updateFavoriteStatus();
+  }
+
+  void _updateFavoriteStatus() {
+    final pokemonId = widget.filteredPokedex[currentIndex]['id'];
+    setState(() {
+      isFavorite = widget.favoritePokemonIds.contains(pokemonId);
+    });
+  }
+
+  void _toggleFavorite() async {
+    final pokemonId = widget.filteredPokedex[currentIndex]['id'];
+    final prefs = await SharedPreferences.getInstance();
+
+    setState(() {
+      if (isFavorite) {
+        widget.favoritePokemonIds.remove(pokemonId);
+      } else {
+        widget.favoritePokemonIds.add(pokemonId);
+      }
+      isFavorite = !isFavorite;
+
+      // Guardar favoritos actualizados
+      prefs.setStringList(
+        'favoritePokemonIds',
+        widget.favoritePokemonIds.map((id) => id.toString()).toList(),
+      );
+    });
   }
 
   @override
@@ -79,13 +113,26 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                 backgroundColor: Colors.transparent,
                 elevation: 0,
                 iconTheme: const IconThemeData(color: Colors.white),
-                title: Text(
-                  pokemonDetail['name'],
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      pokemonDetail['name'],
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        isFavorite ? Icons.star : Icons.star_border,
+                        color: isFavorite ? Colors.yellow : Colors.white,
+                        size: 28,
+                      ),
+                      onPressed: _toggleFavorite,
+                    ),
+                  ],
                 ),
               ),
               // Animación de la imagen principal
@@ -96,7 +143,8 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                 child: CachedNetworkImage(
                   imageUrl: imageUrl,
                   fit: BoxFit.contain,
-                  errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.red),
+                  errorWidget: (context, url, error) =>
+                  const Icon(Icons.error, color: Colors.red),
                 ),
               ),
               const SizedBox(height: 16),
@@ -142,7 +190,8 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                     const SizedBox(height: 16),
                     const Text(
                       "Evolution Chain",
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                      style: TextStyle(
+                          fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
                     ),
                     const SizedBox(height: 8),
                     SizedBox(
@@ -166,9 +215,12 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                                       fullPokedex: widget.fullPokedex,
                                       filteredPokedex: widget.fullPokedex,
                                       currentIndex: targetIndex,
+                                      favoritePokemonIds: widget.favoritePokemonIds,
+                                      onFavoriteToggle: widget.onFavoriteToggle, // Asegúrate de incluir esto
                                     ),
                                   ),
                                 );
+
                               }
                             },
                             child: Padding(
@@ -197,52 +249,6 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                   ],
                 ),
               ),
-              // Lista de Pokémon (barra horizontal)
-              // const Padding(
-              //   padding: EdgeInsets.all(16.0),
-              //   child: Text(
-              //     "All Pokémon",
-              //     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
-              //   ),
-              // ),
-              // SizedBox(
-              //   height: 120,
-              //   child: ListView.builder(
-              //     scrollDirection: Axis.horizontal,
-              //     itemCount: widget.filteredPokedex.length,
-              //     itemBuilder: (context, index) {
-              //       final otherPokemon = widget.filteredPokedex[index];
-              //       final otherImageUrl = otherPokemon['pokemon_v2_pokemonsprites'][0]['sprites']['front_default'];
-              //
-              //       return GestureDetector(
-              //         onTap: () {
-              //           setState(() {
-              //             currentIndex = index;
-              //           });
-              //         },
-              //         child: Padding(
-              //           padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              //           child: Column(
-              //             children: [
-              //               CachedNetworkImage(
-              //                 imageUrl: otherImageUrl,
-              //                 height: 80,
-              //                 errorWidget: (context, url, error) =>
-              //                 const Icon(Icons.error, color: Colors.red),
-              //               ),
-              //               const SizedBox(height: 5),
-              //               Text(
-              //                 otherPokemon['name'],
-              //                 style: const TextStyle(color: Colors.white, fontSize: 12),
-              //                 overflow: TextOverflow.ellipsis,
-              //               ),
-              //             ],
-              //           ),
-              //         ),
-              //       );
-              //     },
-              //   ),
-              // ),
             ],
           ),
         ),

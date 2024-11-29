@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart'; // Importamos shared_preferences
 import 'pokemon_details_screen.dart';
 import 'queries/graphql_queries.dart'; // Importamos la consulta GraphQL
 
@@ -37,6 +38,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   String? selectedType;
   int? selectedGeneration;
   String searchQuery = "";
+  Set<int> favoritePokemonIds = {}; // IDs de Pokémon favoritos
+  bool showFavoritesOnly = false; // Mostrar solo favoritos
   late AnimationController _animationController;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController searchController = TextEditingController();
@@ -55,6 +58,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       duration: const Duration(milliseconds: 500),
       vsync: this,
     )..forward();
+    _loadFavorites(); // cargo los favoritos al iniciar
   }
 
   @override
@@ -62,6 +66,20 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     _scrollController.dispose();
     _animationController.dispose();
     super.dispose();
+  }
+
+  void _loadFavorites() async {
+    final prefs = await SharedPreferences.getInstance();
+    final favoriteIds = prefs.getStringList('favoritePokemonIds') ?? [];
+    setState(() {
+      favoritePokemonIds = favoriteIds.map((id) => int.parse(id)).toSet();
+    });
+  }
+
+  void _saveFavorites() async {
+    final prefs = await SharedPreferences.getInstance();
+    final favoriteIds = favoritePokemonIds.map((id) => id.toString()).toList();
+    prefs.setStringList('favoritePokemonIds', favoriteIds);
   }
 
   @override
@@ -83,6 +101,19 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           ),
         ),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(
+              showFavoritesOnly ? Icons.favorite : Icons.favorite_border,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              setState(() {
+                showFavoritesOnly = !showFavoritesOnly;
+              });
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -119,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       items: types.map((type) {
                         final typeKey = type.toLowerCase();
                         return DropdownMenuItem<String>(
-                          value: type.toLowerCase(), // Asegúrate de usar valores consistentes
+                          value: type.toLowerCase(),
                           child: Row(
                             children: [
                               Icon(
@@ -135,11 +166,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       }).toList(),
                       onChanged: (value) {
                         setState(() {
-                          selectedType = value == 'all' ? null : value; // Convertimos "all" a `null`
+                          selectedType = value == 'all' ? null : value;
                         });
                       },
                     ),
-
                     DropdownButton<int?>(
                       value: selectedGeneration,
                       hint: const Text("Generación"),
@@ -155,7 +185,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         });
                       },
                     ),
-
                   ],
                 ),
               ],
@@ -165,7 +194,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           Expanded(
             child: Query(
               options: QueryOptions(
-                document: gql(getPokemonListQuery), // usando la consulta
+                document: gql(getPokemonListQuery),
               ),
               builder: (QueryResult result, {fetchMore, refetch}) {
                 if (result.isLoading) {
@@ -179,9 +208,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     ?.cast<Map<String, dynamic>>() ??
                     [];
 
-                // Filtro
-                final filteredPokedex = pokedex.where((pokemon) {
-                  // Filtro por tipo
+                final displayedPokedex = showFavoritesOnly
+                    ? pokedex.where((pokemon) => favoritePokemonIds.contains(pokemon['id'])).toList()
+                    : pokedex;
+
+                final filteredPokedex = displayedPokedex.where((pokemon) {
                   final types = (pokemon['pokemon_v2_pokemontypes'] as List?)
                       ?.map((typeData) =>
                       (typeData['pokemon_v2_type']['name'] as String).toLowerCase())
@@ -212,6 +243,9 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   itemCount: filteredPokedex.length,
                   itemBuilder: (context, index) {
                     final pokemon = filteredPokedex[index];
+                    final pokemonId = pokemon['id'];
+                    final isFavorite = favoritePokemonIds.contains(pokemonId);
+
                     final types = (pokemon['pokemon_v2_pokemontypes'] as List?)
                         ?.map((typeData) => typeData['pokemon_v2_type']['name'] as String)
                         .toList() ??
@@ -229,9 +263,21 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                               fullPokedex: pokedex,
                               filteredPokedex: filteredPokedex,
                               currentIndex: index,
+                              favoritePokemonIds: favoritePokemonIds,
+                              onFavoriteToggle: (pokemonId) { // callback
+                                setState(() {
+                                  if (favoritePokemonIds.contains(pokemonId)) {
+                                    favoritePokemonIds.remove(pokemonId);
+                                  } else {
+                                    favoritePokemonIds.add(pokemonId);
+                                  }
+                                });
+                                _saveFavorites(); // guardar los favoritos actualizados
+                              },
                             ),
                           ),
                         );
+
                       },
                       child: Container(
                         decoration: BoxDecoration(
@@ -245,39 +291,72 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                           ),
                           borderRadius: const BorderRadius.all(Radius.circular(20)),
                         ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Stack(
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.only(top: 10, left: 10),
-                              child: Text(
-                                pokemon['name'].toUpperCase(),
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 10, left: 10),
+                                  child: Text(
+                                    pokemon['name'].toUpperCase(),
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
                                 ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 10, bottom: 5),
+                                  child: Row(
+                                    children: types.map((type) {
+                                      return Icon(
+                                        _typeIcons[type.toLowerCase()] ?? Icons.help,
+                                        color: Colors.white,
+                                        size: 18,
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Center(
+                                    child: imageUrl != null
+                                        ? CachedNetworkImage(
+                                      imageUrl: imageUrl,
+                                      height: 170,
+                                      fit: BoxFit.contain,
+                                    )
+                                        : const Icon(
+                                      Icons.image_not_supported,
+                                      color: Colors.white,
+                                      size: 100,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 10, bottom: 5),
-                              child: Row(
-                                children: types.map((type) {
-                                  return Icon(
-                                    _typeIcons[type.toLowerCase()] ?? Icons.help,
-                                    color: Colors.white,
-                                    size: 18,
-                                  );
-                                }).toList(),
-                              ),
-                            ),
-                            Expanded(
-                              child: Center(
-                                child: imageUrl != null
-                                    ? CachedNetworkImage(imageUrl: imageUrl, height: 170, fit: BoxFit.contain, )
-                                    : const Icon(Icons.image_not_supported, color: Colors.white, size: 100,),
+                            Positioned(
+                              top: 10,
+                              right: 10,
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    if (isFavorite) {
+                                      favoritePokemonIds.remove(pokemonId);
+                                    } else {
+                                      favoritePokemonIds.add(pokemonId);
+                                    }
+                                  });
+                                  _saveFavorites();
+                                },
+                                child: Icon(
+                                  isFavorite ? Icons.star : Icons.star_border,
+                                  color: isFavorite ? Colors.yellow : Colors.white,
+                                  size: 24,
+                                ),
                               ),
                             ),
                           ],
