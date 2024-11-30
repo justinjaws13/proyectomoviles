@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:pokedex_final/queries/FilterSection.dart';
 import 'package:shared_preferences/shared_preferences.dart'; // Importamos shared_preferences
 import 'pokemon_details_screen.dart';
 import 'queries/graphql_queries.dart'; // Importamos la consulta GraphQL
@@ -37,6 +38,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   String? selectedType;
   int? selectedGeneration;
+  String? selectedAbility;
+  String? selectedSortOrder;
   String searchQuery = "";
   Set<int> favoritePokemonIds = {}; // IDs de Pokémon favoritos
   bool showFavoritesOnly = false; // Mostrar solo favoritos
@@ -44,12 +47,37 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   final ScrollController _scrollController = ScrollController();
   final TextEditingController searchController = TextEditingController();
 
+  // Rango de poder
+  int? minPower = 0; // Poder mínimo
+  int? maxPower = 800; // Poder máximo
+  RangeValues powerRange = const RangeValues(0, 800);
+
   final List<String> types = [
     'All', 'Grass', 'Fire', 'Water', 'Electric', 'Rock', 'Ground', 'Psychic',
     'Fighting', 'Bug', 'Ghost', 'Normal', 'Poison', 'Ice', 'Dragon', 'Dark',
     'Fairy', 'Steel', 'Flying'
   ];
   final List<int?> generations = [null, 1, 2, 3, 4, 5, 6, 7, 8];
+
+  final List<String> abilities = [
+    'All', 'Overgrow', 'Blaze', 'Torrent', 'Static', 'Poison Point', 'Swift Swim',
+    'Intimidate', 'Levitate', 'Chlorophyll', 'Guts', 'Keen Eye', 'Sturdy', 'Inner Focus',
+    'Compound Eyes', 'Sand Stream', 'Pressure', 'Synchronize', 'Thick Fat', 'Immunity',
+    'Flash Fire', 'Flame Body', 'Water Absorb', 'Volt Absorb', 'Cute Charm', 'Shell Armor',
+    'Natural Cure', 'Run Away', 'Pickup', 'Early Bird', 'Truant', 'Hustle', 'Marvel Scale',
+    'Battle Armor', 'Hyper Cutter', 'Soundproof', 'Effect Spore', 'Arena Trap',
+    'Vital Spirit', 'Rain Dish', 'Speed Boost', 'Magic Guard', 'Filter', 'Iron Barbs',
+    'Adaptability', 'Sheer Force', 'Mold Breaker', 'Prankster', 'Rough Skin', 'Lightning Rod',
+    'Unburden', 'Technician', 'Mega Launcher', 'Contrary', 'Bulletproof', 'Strong Jaw',
+    'Protean', 'Drought', 'Defiant', 'Victory Star', 'Snow Warning', 'Solar Power', 'Steadfast',
+    'No Guard', 'Reckless', 'Multiscale', 'Magic Bounce', 'Pixilate', 'Parental Bond',
+    'Dark Aura', 'Fairy Aura', 'Aura Break', 'Shadow Shield',
+  ];
+
+  final List<String> sortOptions = [
+    'Number', 'Name', 'Power', 'Type', 'Abilities'
+  ];
+
 
   @override
   void initState() {
@@ -69,11 +97,15 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   }
 
   void _loadFavorites() async {
-    final prefs = await SharedPreferences.getInstance();
-    final favoriteIds = prefs.getStringList('favoritePokemonIds') ?? [];
-    setState(() {
-      favoritePokemonIds = favoriteIds.map((id) => int.parse(id)).toSet();
-    });
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final favoriteIds = prefs.getStringList('favoritePokemonIds') ?? [];
+      setState(() {
+        favoritePokemonIds = favoriteIds.map((id) => int.parse(id)).toSet();
+      });
+    } catch (e) {
+      print("Error al cargar favoritos: $e");
+    }
   }
 
   void _saveFavorites() async {
@@ -120,74 +152,44 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           const SizedBox(height: 10),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
-            child: Column(
-              children: [
-                TextField(
-                  controller: searchController,
-                  decoration: InputDecoration(
-                    hintText: "Buscar Pokémon por nombre o número",
-                    prefixIcon: const Icon(Icons.search),
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                  onChanged: (value) {
-                    setState(() {
-                      searchQuery = value.toLowerCase();
-                    });
-                  },
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    DropdownButton<String>(
-                      value: selectedType,
-                      hint: const Text("Tipo"),
-                      items: types.map((type) {
-                        final typeKey = type.toLowerCase();
-                        return DropdownMenuItem<String>(
-                          value: type.toLowerCase(),
-                          child: Row(
-                            children: [
-                              Icon(
-                                _typeIcons[typeKey] ?? Icons.help,
-                                color: Colors.blueGrey[900],
-                                size: 20,
-                              ),
-                              const SizedBox(width: 8),
-                              Text(type, style: const TextStyle(fontSize: 16)),
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          selectedType = value == 'all' ? null : value;
-                        });
-                      },
-                    ),
-                    DropdownButton<int?>(
-                      value: selectedGeneration,
-                      hint: const Text("Generación"),
-                      items: generations.map((gen) {
-                        return DropdownMenuItem<int?>(
-                          value: gen,
-                          child: Text(gen == null ? 'Gen' : "Gen $gen"),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        setState(() {
-                          selectedGeneration = value;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ],
+            child: FiltersSection(
+              types: types,
+              typeIcons: _typeIcons,
+              generations: generations,
+              abilities: abilities,
+              sortOptions: sortOptions,
+              selectedType: selectedType,
+              onTypeChanged: (value) {
+                setState(() {
+                  selectedType = value == 'all' ? null : value;
+                });
+              },
+              selectedGeneration: selectedGeneration,
+              onGenerationChanged: (value) {
+                setState(() {
+                  selectedGeneration = value;
+                });
+              },
+              selectedAbility: selectedAbility,
+              onAbilityChanged: (value) {
+                setState(() {
+                  selectedAbility = value;
+                });
+              },
+              powerRange: powerRange,
+              onPowerRangeChanged: (range) {
+                setState(() {
+                  powerRange = range;
+                  minPower = range.start.toInt();
+                  maxPower = range.end.toInt();
+                });
+              },
+              selectedSortOrder: selectedSortOrder,
+              onSortOrderChanged: (value) {
+                setState(() {
+                  selectedSortOrder = value;
+                });
+              },
             ),
           ),
           const SizedBox(height: 10),
@@ -219,17 +221,84 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       .toList() ??
                       [];
                   final generation = pokemon['pokemon_v2_pokemonspecy']?['generation_id'];
+
+                  final abilities = (pokemon['pokemon_v2_pokemonabilities'] as List?)
+                      ?.map((abilityData) =>
+                  abilityData['pokemon_v2_ability']['name'] as String)
+                      .toList() ??
+                      [];
+
+                  final power = ((pokemon['pokemon_v2_pokemonstats'] as List?) ?? [])
+                      .fold<int>(0, (sum, stat) => sum + ((stat['base_stat'] ?? 0) as int));
+
                   final name = (pokemon['name'] as String).toLowerCase();
 
                   final matchesType = selectedType == null || types.contains(selectedType);
                   final matchesGeneration =
                       selectedGeneration == null || generation == selectedGeneration;
+                  final matchesAbility =
+                      selectedAbility == null || abilities.contains(selectedAbility);
                   final matchesSearch = searchQuery.isEmpty ||
                       name.contains(searchQuery) ||
                       pokemon['id'].toString() == searchQuery;
 
-                  return matchesType && matchesGeneration && matchesSearch;
+                  // Nueva condición: verificar si el poder está dentro del rango seleccionado
+                  final matchesPower = (minPower == null || power >= minPower!) &&
+                      (maxPower == null || power <= maxPower!);
+
+                  return matchesType && matchesGeneration && matchesAbility && matchesPower && matchesSearch;
                 }).toList();
+
+                // Aplicar ordenación
+                if (selectedSortOrder != null) {
+                  if (selectedSortOrder == 'name') {
+                    filteredPokedex.sort((a, b) =>
+                        (a['name'] as String).compareTo(b['name'] as String));
+                  } else if (selectedSortOrder == 'number') {
+                    filteredPokedex.sort((a, b) =>
+                        (a['id'] as int).compareTo(b['id'] as int));
+                  } else if (selectedSortOrder == 'power') {
+                    filteredPokedex.sort((a, b) {
+                      final powerA = ((a['pokemon_v2_pokemonstats'] as List?) ?? [])
+                          .fold<int>(0, (sum, stat) => sum + ((stat['base_stat'] ?? 0) as int));
+                      final powerB = ((b['pokemon_v2_pokemonstats'] as List?) ?? [])
+                          .fold<int>(0, (sum, stat) => sum + ((stat['base_stat'] ?? 0) as int));
+                      return powerB.compareTo(powerA);
+                    });
+                  } else if (selectedSortOrder == 'type') {
+                    filteredPokedex.sort((a, b) {
+                      final typesA = (a['pokemon_v2_pokemontypes'] as List?)
+                          ?.map((typeData) => typeData['pokemon_v2_type']['name'] as String)
+                          .toList() ??
+                          [];
+                      final typesB = (b['pokemon_v2_pokemontypes'] as List?)
+                          ?.map((typeData) => typeData['pokemon_v2_type']['name'] as String)
+                          .toList() ??
+                          [];
+                      final firstTypeA = typesA.isNotEmpty ? typesA.first : '';
+                      final firstTypeB = typesB.isNotEmpty ? typesB.first : '';
+                      return firstTypeA.compareTo(firstTypeB);
+                    });
+                  } else if (selectedSortOrder == 'ability') {
+                    filteredPokedex.sort((a, b) {
+                      final abilitiesA = (a['pokemon_v2_pokemonabilities'] as List?)
+                          ?.map((abilityData) =>
+                      abilityData['pokemon_v2_ability']['name'] as String)
+                          .toList() ??
+                          [];
+                      final abilitiesB = (b['pokemon_v2_pokemonabilities'] as List?)
+                          ?.map((abilityData) =>
+                      abilityData['pokemon_v2_ability']['name'] as String)
+                          .toList() ??
+                          [];
+                      final firstAbilityA = abilitiesA.isNotEmpty ? abilitiesA.first : '';
+                      final firstAbilityB = abilitiesB.isNotEmpty ? abilitiesB.first : '';
+                      return firstAbilityA.compareTo(firstAbilityB);
+                    });
+                  }
+                }
+
+
 
                 return GridView.builder(
                   controller: _scrollController,
