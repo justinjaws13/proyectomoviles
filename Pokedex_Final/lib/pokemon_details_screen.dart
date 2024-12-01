@@ -1,6 +1,9 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Para persistencia
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:flutter/services.dart';
 
 class PokemonDetailScreen extends StatefulWidget {
   final List<Map<String, dynamic>> fullPokedex; // Lista completa de Pokémon
@@ -60,6 +63,53 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
     });
   }
 
+  /// Función para compartir los detalles del Pokémon
+  Future<void> _sharePokemonDetails() async {
+    final pokemonDetail = widget.filteredPokedex[currentIndex];
+    final name = pokemonDetail['name'];
+    final types = pokemonDetail['pokemon_v2_pokemontypes']
+        .map((type) => type['pokemon_v2_type']['name'])
+        .join(', ');
+    final abilities = pokemonDetail['pokemon_v2_pokemonabilities']
+        .map((ability) => ability['pokemon_v2_ability']['name'])
+        .join(', ');
+    final stats = pokemonDetail['pokemon_v2_pokemonstats']
+        .map((stat) =>
+    "${stat['pokemon_v2_stat']['name']}: ${stat['base_stat']}")
+        .join('\n');
+    final imageUrl = pokemonDetail['pokemon_v2_pokemonsprites'][0]['sprites']
+    ['front_default'];
+
+    final details = '''
+¡Mira este Pokémon!
+Nombre: $name
+Tipos: $types
+Habilidades: $abilities
+Estadísticas:
+$stats
+''';
+
+    // Descargar la imagen y convertirla en un archivo para compartir
+    try {
+      final ByteData byteData =
+      await NetworkAssetBundle(Uri.parse(imageUrl)).load('');
+      final Uint8List imageBytes = byteData.buffer.asUint8List();
+
+      await Share.shareXFiles(
+        [
+          XFile.fromData(
+            imageBytes,
+            name: '$name.png',
+            mimeType: 'image/png',
+          ),
+        ],
+        text: details,
+      );
+    } catch (e) {
+      print("Error al compartir el Pokémon: $e");
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final pokemonDetail = widget.filteredPokedex[currentIndex];
@@ -68,33 +118,41 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
     final spriteData = pokemonDetail['pokemon_v2_pokemonsprites'];
     final imageUrl = (spriteData.isNotEmpty && spriteData[0]['sprites'] != null
         ? spriteData[0]['sprites']['front_default']
-        : '')?.toString() ?? '';
+        : '')?.toString() ??
+        '';
 
     // Cadena evolutiva completa (usando la lista completa de Pokémon)
     final speciesData = pokemonDetail['pokemon_v2_pokemonspecy'];
-    final evolutionChain = speciesData['pokemon_v2_evolutionchain']['pokemon_v2_pokemonspecies'];
+    final evolutionChain = speciesData['pokemon_v2_evolutionchain']
+    ['pokemon_v2_pokemonspecies'];
 
     final allEvolutions = evolutionChain.map<Map<String, String>>((evolution) {
       final evolutionName = (evolution['name'] ?? 'Unknown').toString();
 
-      // Buscar en la lista completa (fullPokedex)
+      // Buscar en la lista completa
       final matchedPokemon = widget.fullPokedex.firstWhere(
             (pokemon) => pokemon['name'] == evolutionName,
-        orElse: () => {},
+        orElse: () => {}, // Aquí puede estar el problema
       );
 
-      // Obtener la imagen de la evolución
-      final evolutionImage = matchedPokemon.isNotEmpty &&
-          matchedPokemon['pokemon_v2_pokemonsprites'] != null &&
-          matchedPokemon['pokemon_v2_pokemonsprites'][0]['sprites'] != null
-          ? (matchedPokemon['pokemon_v2_pokemonsprites'][0]['sprites']['front_default'] ?? '').toString()
+      final evolutionImage = (matchedPokemon['pokemon_v2_pokemonsprites']
+          ?.isNotEmpty ==
+          true)
+          ? matchedPokemon['pokemon_v2_pokemonsprites'][0]['sprites']
+      ['front_default']
+          .toString()
           : '';
 
-      return {'name': evolutionName, 'imageUrl': evolutionImage};
+      return {
+        'name': evolutionName,
+        'imageUrl': evolutionImage,
+      };
     }).toList();
 
+
     // Colores
-    final pokemonType = pokemonDetail['pokemon_v2_pokemontypes'][0]['pokemon_v2_type']['name'];
+    final pokemonType = pokemonDetail['pokemon_v2_pokemontypes'][0]
+    ['pokemon_v2_type']['name'];
     final typeColors = _getTypeGradient(pokemonType);
 
     return Scaffold(
@@ -124,13 +182,21 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    IconButton(
-                      icon: Icon(
-                        isFavorite ? Icons.star : Icons.star_border,
-                        color: isFavorite ? Colors.yellow : Colors.white,
-                        size: 28,
-                      ),
-                      onPressed: _toggleFavorite,
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            isFavorite ? Icons.star : Icons.star_border,
+                            color: isFavorite ? Colors.yellow : Colors.white,
+                            size: 28,
+                          ),
+                          onPressed: _toggleFavorite,
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.share, color: Colors.white),
+                          onPressed: _sharePokemonDetails,
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -155,7 +221,8 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                   children: [
                     _buildCard(
                       title: "Height & Weight",
-                      content: "Height: ${pokemonDetail['height']}\nWeight: ${pokemonDetail['weight']}",
+                      content:
+                      "Height: ${pokemonDetail['height']}\nWeight: ${pokemonDetail['weight']}",
                       icon: Icons.straighten,
                     ),
                     _buildCard(
@@ -168,7 +235,8 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                     _buildCard(
                       title: "Abilities",
                       content: pokemonDetail['pokemon_v2_pokemonabilities']
-                          .map((ability) => ability['pokemon_v2_ability']['name'])
+                          .map((ability) =>
+                      ability['pokemon_v2_ability']['name'])
                           .join(', '),
                       icon: Icons.flash_on,
                     ),
@@ -191,7 +259,9 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                     const Text(
                       "Evolution Chain",
                       style: TextStyle(
-                          fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white),
                     ),
                     const SizedBox(height: 8),
                     SizedBox(
@@ -204,7 +274,8 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                           return GestureDetector(
                             onTap: () {
                               final targetIndex = widget.fullPokedex.indexWhere(
-                                    (pokemon) => pokemon['name'] == evolution['name'],
+                                    (pokemon) =>
+                                pokemon['name'] == evolution['name'],
                               );
 
                               if (targetIndex != -1) {
@@ -215,16 +286,18 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                                       fullPokedex: widget.fullPokedex,
                                       filteredPokedex: widget.fullPokedex,
                                       currentIndex: targetIndex,
-                                      favoritePokemonIds: widget.favoritePokemonIds,
-                                      onFavoriteToggle: widget.onFavoriteToggle, // Asegúrate de incluir esto
+                                      favoritePokemonIds:
+                                      widget.favoritePokemonIds,
+                                      onFavoriteToggle:
+                                      widget.onFavoriteToggle, // Asegúrate de incluir esto
                                     ),
                                   ),
                                 );
-
                               }
                             },
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                              padding:
+                              const EdgeInsets.symmetric(horizontal: 8.0),
                               child: Column(
                                 children: [
                                   CachedNetworkImage(
@@ -232,12 +305,14 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                                     height: 100,
                                     fit: BoxFit.fitHeight,
                                     errorWidget: (context, url, error) =>
-                                    const Icon(Icons.error, color: Colors.red),
+                                    const Icon(Icons.error,
+                                        color: Colors.red),
                                   ),
                                   const SizedBox(height: 5),
                                   Text(
                                     evolution['name'],
-                                    style: const TextStyle(color: Colors.white),
+                                    style:
+                                    const TextStyle(color: Colors.white),
                                   ),
                                 ],
                               ),
