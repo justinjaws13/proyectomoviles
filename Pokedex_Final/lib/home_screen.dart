@@ -3,9 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:pokedex_final/queries/FilterSection.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Importamos shared_preferences
+import 'package:shared_preferences/shared_preferences.dart';
 import 'pokemon_details_screen.dart';
-import 'queries/graphql_queries.dart'; // Importamos la consulta GraphQL
+import 'queries/graphql_queries.dart';
+import 'queries/FilterSection.dart';
 
 const Map<String, IconData> _typeIcons = {
   'grass': Icons.grass,
@@ -41,15 +42,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   String? selectedAbility;
   String? selectedSortOrder;
   String searchQuery = "";
-  Set<int> favoritePokemonIds = {}; // IDs de Pokémon favoritos
-  bool showFavoritesOnly = false; // Mostrar solo favoritos
+  Set<int> favoritePokemonIds = {};
+  bool showFavoritesOnly = false;
   late AnimationController _animationController;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController searchController = TextEditingController();
 
-  // Rango de poder
-  int? minPower = 0; // Poder mínimo
-  int? maxPower = 800; // Poder máximo
+  int? minPower = 0;
+  int? maxPower = 800;
   RangeValues powerRange = const RangeValues(0, 800);
 
   final List<String> types = [
@@ -74,10 +74,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     'Dark Aura', 'Fairy Aura', 'Aura Break', 'Shadow Shield',
   ];
 
-  final List<String> sortOptions = [
-    'Number', 'Name', 'Power', 'Type', 'Abilities'
-  ];
-
+  final List<String> sortOptions = ['Number', 'Name', 'Power', 'Type', 'Abilities'];
 
   @override
   void initState() {
@@ -86,7 +83,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       duration: const Duration(milliseconds: 500),
       vsync: this,
     )..forward();
-    _loadFavorites(); // cargo los favoritos al iniciar
+    _loadFavorites();
   }
 
   @override
@@ -215,6 +212,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     : pokedex;
 
                 final filteredPokedex = displayedPokedex.where((pokemon) {
+                  if (showFavoritesOnly) {
+                    return favoritePokemonIds.contains(pokemon['id']);
+                  }
+
                   final types = (pokemon['pokemon_v2_pokemontypes'] as List?)
                       ?.map((typeData) =>
                       (typeData['pokemon_v2_type']['name'] as String).toLowerCase())
@@ -242,63 +243,15 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                       name.contains(searchQuery) ||
                       pokemon['id'].toString() == searchQuery;
 
-                  // Nueva condición: verificar si el poder está dentro del rango seleccionado
                   final matchesPower = (minPower == null || power >= minPower!) &&
                       (maxPower == null || power <= maxPower!);
 
-                  return matchesType && matchesGeneration && matchesAbility && matchesPower && matchesSearch;
+                  return matchesType &&
+                      matchesGeneration &&
+                      matchesAbility &&
+                      matchesPower &&
+                      matchesSearch;
                 }).toList();
-
-                // Aplicar ordenación
-                if (selectedSortOrder != null) {
-                  if (selectedSortOrder == 'name') {
-                    filteredPokedex.sort((a, b) =>
-                        (a['name'] as String).compareTo(b['name'] as String));
-                  } else if (selectedSortOrder == 'number') {
-                    filteredPokedex.sort((a, b) =>
-                        (a['id'] as int).compareTo(b['id'] as int));
-                  } else if (selectedSortOrder == 'power') {
-                    filteredPokedex.sort((a, b) {
-                      final powerA = ((a['pokemon_v2_pokemonstats'] as List?) ?? [])
-                          .fold<int>(0, (sum, stat) => sum + ((stat['base_stat'] ?? 0) as int));
-                      final powerB = ((b['pokemon_v2_pokemonstats'] as List?) ?? [])
-                          .fold<int>(0, (sum, stat) => sum + ((stat['base_stat'] ?? 0) as int));
-                      return powerB.compareTo(powerA);
-                    });
-                  } else if (selectedSortOrder == 'type') {
-                    filteredPokedex.sort((a, b) {
-                      final typesA = (a['pokemon_v2_pokemontypes'] as List?)
-                          ?.map((typeData) => typeData['pokemon_v2_type']['name'] as String)
-                          .toList() ??
-                          [];
-                      final typesB = (b['pokemon_v2_pokemontypes'] as List?)
-                          ?.map((typeData) => typeData['pokemon_v2_type']['name'] as String)
-                          .toList() ??
-                          [];
-                      final firstTypeA = typesA.isNotEmpty ? typesA.first : '';
-                      final firstTypeB = typesB.isNotEmpty ? typesB.first : '';
-                      return firstTypeA.compareTo(firstTypeB);
-                    });
-                  } else if (selectedSortOrder == 'ability') {
-                    filteredPokedex.sort((a, b) {
-                      final abilitiesA = (a['pokemon_v2_pokemonabilities'] as List?)
-                          ?.map((abilityData) =>
-                      abilityData['pokemon_v2_ability']['name'] as String)
-                          .toList() ??
-                          [];
-                      final abilitiesB = (b['pokemon_v2_pokemonabilities'] as List?)
-                          ?.map((abilityData) =>
-                      abilityData['pokemon_v2_ability']['name'] as String)
-                          .toList() ??
-                          [];
-                      final firstAbilityA = abilitiesA.isNotEmpty ? abilitiesA.first : '';
-                      final firstAbilityB = abilitiesB.isNotEmpty ? abilitiesB.first : '';
-                      return firstAbilityA.compareTo(firstAbilityB);
-                    });
-                  }
-                }
-
-
 
                 return GridView.builder(
                   controller: _scrollController,
@@ -316,7 +269,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     final isFavorite = favoritePokemonIds.contains(pokemonId);
 
                     final types = (pokemon['pokemon_v2_pokemontypes'] as List?)
-                        ?.map((typeData) => typeData['pokemon_v2_type']['name'] as String)
+                        ?.map((typeData) =>
+                    typeData['pokemon_v2_type']['name'] as String)
                         .toList() ??
                         ['Unknown'];
 
@@ -333,7 +287,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                               filteredPokedex: filteredPokedex,
                               currentIndex: index,
                               favoritePokemonIds: favoritePokemonIds,
-                              onFavoriteToggle: (pokemonId) { // callback
+                              onFavoriteToggle: (pokemonId) {
                                 setState(() {
                                   if (favoritePokemonIds.contains(pokemonId)) {
                                     favoritePokemonIds.remove(pokemonId);
@@ -341,12 +295,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                     favoritePokemonIds.add(pokemonId);
                                   }
                                 });
-                                _saveFavorites(); // guardar los favoritos actualizados
+                                _saveFavorites();
                               },
                             ),
                           ),
                         );
-
                       },
                       child: Container(
                         decoration: BoxDecoration(
