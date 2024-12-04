@@ -305,6 +305,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                         },
                       ),
                     ),
+                    //falta poner el carrusel
                   ],
                 ),
               ),
@@ -507,7 +508,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
 
   final GlobalKey _shareKey = GlobalKey();
 
-  /// Captura el lienzo como imagen
+  // Captura el lienzo como imagen
   Future<Uint8List> _capturePokemonCard() async {
     try {
       RenderRepaintBoundary boundary =
@@ -530,7 +531,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
       case 'water':
         return [Colors.blue, Colors.lightBlueAccent];
       case 'electric':
-        return [Colors.yellowAccent, Colors.amber];
+        return [Colors.yellow, Colors.amber];
       case 'rock':
         return [Colors.brown, Colors.grey];
       case 'ground':

@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:pokedex_final/queries/FilterSection.dart';
+import 'package:pokedex_final/FilterSection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'pokemon_details_screen.dart';
 import 'queries/graphql_queries.dart';
@@ -138,8 +138,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               ),
               padding: const EdgeInsets.all(8),
               child: Icon(
-                showFavoritesOnly ? Icons.favorite : Icons.favorite_border,
-                color: Colors.red, // Color del corazón
+                showFavoritesOnly ? Icons.star : Icons.star_border,
+                color: Colors.yellow, // Color del corazón
                 size: 28,
               ),
             ),
@@ -351,6 +351,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                               favoritePokemonIds: favoritePokemonIds,
                               onFavoriteToggle: (pokemonId) {
                                 setState(() {
+
+                                  // id=pokemonId.toString()
                                   if (favoritePokemonIds.contains(pokemonId)) {
                                     favoritePokemonIds.remove(pokemonId);
                                   } else {
