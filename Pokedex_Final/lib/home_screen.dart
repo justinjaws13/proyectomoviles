@@ -131,9 +131,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(
-              showFavoritesOnly ? Icons.favorite : Icons.favorite_border,
-              color: Colors.white,
+            icon: Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.red.withOpacity(0.2), // Fondo semitransparente rojo
+              ),
+              padding: const EdgeInsets.all(8),
+              child: Icon(
+                showFavoritesOnly ? Icons.favorite : Icons.favorite_border,
+                color: Colors.red, // Color del corazón
+                size: 28,
+              ),
             ),
             onPressed: () {
               setState(() {
@@ -142,6 +150,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             },
           ),
         ],
+
       ),
       body: Column(
         children: [
