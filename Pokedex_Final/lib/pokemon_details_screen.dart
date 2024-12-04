@@ -1,6 +1,8 @@
 import 'dart:typed_data';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/rendering.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:flutter/services.dart';
@@ -63,52 +65,25 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
     });
   }
 
-  /// Función para compartir los detalles del Pokémon
   Future<void> _sharePokemonDetails() async {
-    final pokemonDetail = widget.filteredPokedex[currentIndex];
-    final name = pokemonDetail['name'];
-    final types = pokemonDetail['pokemon_v2_pokemontypes']
-        .map((type) => type['pokemon_v2_type']['name'])
-        .join(', ');
-    final abilities = pokemonDetail['pokemon_v2_pokemonabilities']
-        .map((ability) => ability['pokemon_v2_ability']['name'])
-        .join(', ');
-    final stats = pokemonDetail['pokemon_v2_pokemonstats']
-        .map((stat) =>
-    "${stat['pokemon_v2_stat']['name']}: ${stat['base_stat']}")
-        .join('\n');
-    final imageUrl = pokemonDetail['pokemon_v2_pokemonsprites'][0]['sprites']
-    ['front_default'];
-
-    final details = '''
-¡Mira este Pokémon!
-Nombre: $name
-Tipos: $types
-Habilidades: $abilities
-Estadísticas:
-$stats
-''';
-
-    // Descargar la imagen y convertirla en un archivo para compartir
     try {
-      final ByteData byteData =
-      await NetworkAssetBundle(Uri.parse(imageUrl)).load('');
-      final Uint8List imageBytes = byteData.buffer.asUint8List();
+      final imageBytes = await _capturePokemonCard();
 
       await Share.shareXFiles(
         [
           XFile.fromData(
             imageBytes,
-            name: '$name.png',
+            name: '${widget.filteredPokedex[currentIndex]['name']}.png',
             mimeType: 'image/png',
           ),
         ],
-        text: details,
+        text: '¡Mira este increíble Pokémon!',
       );
     } catch (e) {
       print("Error al compartir el Pokémon: $e");
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +139,8 @@ $stats
             end: Alignment.bottomRight,
           ),
         ),
-        child: SingleChildScrollView(
+    child: SafeArea(
+    child: SingleChildScrollView(
           child: Column(
             children: [
               AppBar(
@@ -200,6 +176,10 @@ $stats
                     ),
                   ],
                 ),
+              ),
+              RepaintBoundary(
+                key: _shareKey,
+                child: _buildPokemonCardForSharing(pokemonDetail, typeColors),
               ),
               // Animación de la imagen principal
               AnimatedContainer(
@@ -332,6 +312,7 @@ $stats
           ),
         ),
       ),
+      ),
     );
   }
 
@@ -412,6 +393,95 @@ $stats
     );
   }
 
+  // Widget para generar la tarjeta del Pokémon
+  Widget _buildPokemonCardForSharing(
+      Map<String, dynamic> pokemonDetail, List<Color> typeColors) {
+    return Container(
+      width: 300,
+      height: 400,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: typeColors,
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          // Nombre del Pokémon
+          Text(
+            pokemonDetail['name'].toString().toUpperCase(),
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          // Imagen del Pokémon
+          CachedNetworkImage(
+            imageUrl: pokemonDetail['pokemon_v2_pokemonsprites'][0]['sprites']
+            ['front_default'] ??
+                '',
+            height: 150,
+            fit: BoxFit.contain,
+            errorWidget: (context, url, error) =>
+            const Icon(Icons.error, color: Colors.red),
+          ),
+          const SizedBox(height: 16),
+          // Tipos del Pokémon
+          Text(
+            "Type: ${pokemonDetail['pokemon_v2_pokemontypes'].map((type) => type['pokemon_v2_type']['name']).join(', ')}",
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white, fontSize: 16),
+          ),
+          const SizedBox(height: 8),
+          // Habilidades del Pokémon
+          Text(
+            "Abilities: ${pokemonDetail['pokemon_v2_pokemonabilities'].map((ability) => ability['pokemon_v2_ability']['name']).join(', ')}",
+            textAlign: TextAlign.center,
+            style: const TextStyle(color: Colors.white, fontSize: 16),
+          ),
+          const SizedBox(height: 8),
+          // Estadísticas del Pokémon
+          Expanded(
+            child: ListView(
+              children: pokemonDetail['pokemon_v2_pokemonstats']
+                  .map<Widget>((stat) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2.0),
+                  child: Text(
+                    "${stat['pokemon_v2_stat']['name'].toString().toUpperCase()}: ${stat['base_stat']}",
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                  ),
+                );
+              }).toList(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  final GlobalKey _shareKey = GlobalKey();
+
+  /// Captura el lienzo como imagen
+  Future<Uint8List> _capturePokemonCard() async {
+    try {
+      RenderRepaintBoundary boundary =
+      _shareKey.currentContext?.findRenderObject() as RenderRepaintBoundary;
+      var image = await boundary.toImage(pixelRatio: 2.0);
+      ByteData? byteData = await image.toByteData(format: ImageByteFormat.png);
+      return byteData!.buffer.asUint8List();
+    } catch (e) {
+      print("Error al capturar la tarjeta del Pokémon: $e");
+      rethrow;
+    }
+  }
 
   List<Color> _getTypeGradient(String type) {
     switch (type) {
