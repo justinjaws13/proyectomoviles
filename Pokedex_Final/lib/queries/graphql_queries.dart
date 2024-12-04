@@ -30,7 +30,7 @@ const String getPokemonListQuery = """
           name
         }
       }
-      pokemon_v2_pokemonmoves(limit: 5) {  
+      pokemon_v2_pokemonmoves(limit: 20) {  
         pokemon_v2_move {
           name
         }

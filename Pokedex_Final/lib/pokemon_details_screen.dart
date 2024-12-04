@@ -222,37 +222,41 @@ $stats
                     _buildCard(
                       title: "Height & Weight",
                       content:
-                      "Height: ${pokemonDetail['height']}\nWeight: ${pokemonDetail['weight']}",
+                      Text("Height: ${pokemonDetail['height']}\nWeight: ${pokemonDetail['weight']}"),
                       icon: Icons.straighten,
                     ),
                     _buildCard(
                       title: "Types",
-                      content: pokemonDetail['pokemon_v2_pokemontypes']
-                          .map((type) => type['pokemon_v2_type']['name'])
-                          .join(', '),
+                      content: Text(
+                        pokemonDetail['pokemon_v2_pokemontypes']
+                            .map((type) => type['pokemon_v2_type']['name'])
+                            .join(', '),
+                        style: const TextStyle(fontSize: 16, color: Colors.black87),
+                      ),
                       icon: Icons.category,
                     ),
                     _buildCard(
                       title: "Abilities",
-                      content: pokemonDetail['pokemon_v2_pokemonabilities']
+                      content: Text(pokemonDetail['pokemon_v2_pokemonabilities']
                           .map((ability) =>
                       ability['pokemon_v2_ability']['name'])
                           .join(', '),
+                        style: const TextStyle(fontSize: 16, color: Colors.black87),
+                      ),
                       icon: Icons.flash_on,
                     ),
                     _buildCard(
                       title: "Stats",
-                      content: pokemonDetail['pokemon_v2_pokemonstats']
-                          .map((stat) =>
-                      "${stat['pokemon_v2_stat']['name']}: ${stat['base_stat']}")
-                          .join('\n'),
+                      content: _buildStatsTable(pokemonDetail['pokemon_v2_pokemonstats']),
                       icon: Icons.bar_chart,
                     ),
                     _buildCard(
                       title: "Moves",
-                      content: pokemonDetail['pokemon_v2_pokemonmoves']
+                      content: Text(pokemonDetail['pokemon_v2_pokemonmoves']
                           .map((move) => move['pokemon_v2_move']['name'])
                           .join(', '),
+                        style: const TextStyle(fontSize: 16, color: Colors.black87),
+                      ),
                       icon: Icons.sports_martial_arts,
                     ),
                     const SizedBox(height: 16),
@@ -331,38 +335,83 @@ $stats
     );
   }
 
-  Widget _buildCard({required String title, required String content, required IconData icon}) {
+  Widget _buildCard({required String title, required Widget content, required IconData icon}) {
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(icon, color: Colors.blueGrey, size: 40),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    content,
-                    style: const TextStyle(fontSize: 16, color: Colors.black54),
-                  ),
-                ],
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: Colors.black.withOpacity(0.05), // Fondo semitransparente
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, color: Colors.blueGrey, size: 40),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    content, // Aquí pasas directamente el Widget
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
   }
+
+
+  Widget _buildStatsTable(List stats) {
+    return Column(
+      children: stats.map<Widget>((stat) {
+        final statName = stat['pokemon_v2_stat']['name'].toString().toUpperCase();
+        final baseStat = stat['base_stat'];
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 2,
+                child: Text(
+                  statName,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              ),
+              Expanded(
+                flex: 5,
+                child: LinearProgressIndicator(
+                  value: baseStat / 255.0,
+                  backgroundColor: Colors.grey[300],
+                  color: baseStat > 100 ? Colors.green : Colors.red,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                baseStat.toString(),
+                style: const TextStyle(fontSize: 16),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
 
   List<Color> _getTypeGradient(String type) {
     switch (type) {

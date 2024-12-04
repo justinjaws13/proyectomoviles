@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:pokedex_final/queries/FilterSection.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // Importamos shared_preferences
+import 'package:shared_preferences/shared_preferences.dart';
 import 'pokemon_details_screen.dart';
-import 'queries/graphql_queries.dart'; // Importamos la consulta GraphQL
+import 'queries/graphql_queries.dart';
 
 const Map<String, IconData> _typeIcons = {
   'grass': Icons.grass,
@@ -41,15 +41,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   String? selectedAbility;
   String? selectedSortOrder;
   String searchQuery = "";
-  Set<int> favoritePokemonIds = {}; // IDs de Pokémon favoritos
-  bool showFavoritesOnly = false; // Mostrar solo favoritos
+  Set<int> favoritePokemonIds = {};
+  bool showFavoritesOnly = false;
   late AnimationController _animationController;
   final ScrollController _scrollController = ScrollController();
   final TextEditingController searchController = TextEditingController();
 
-  // Rango de poder
-  int? minPower = 0; // Poder mínimo
-  int? maxPower = 800; // Poder máximo
+  int? minPower = 0;
+  int? maxPower = 800;
   RangeValues powerRange = const RangeValues(0, 800);
 
   final List<String> types = [
@@ -74,76 +73,17 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     'Dark Aura', 'Fairy Aura', 'Aura Break', 'Shadow Shield',
   ];
 
-  final List<String> sortOptions = [
-    'Number', 'Name', 'Power', 'Type', 'Abilities'
-  ];
-
-  int currentPage = 0; // Página actual
-  final int itemsPerPage = 20; // Tamaño de página
-  bool isLoadingMore = false; // Indicador de carga adicional
-  List<Map<String, dynamic>> paginatedPokedex = []; // Datos paginados acumulados
+  final List<String> sortOptions = ['Number', 'Name', 'Power', 'Type', 'Abilities'];
 
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll); // Escucha para paginación
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 500),
       vsync: this,
     )..forward();
-    _loadFavorites(); // Cargo los favoritos al iniciar
+    _loadFavorites();
   }
-
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200 &&
-        !isLoadingMore) {
-      _loadMoreData(); // Cargar más datos cuando se acerque al final
-    }
-  }
-  void _loadMoreData() async {
-    if (isLoadingMore) return; // Evitar llamadas adicionales si ya está cargando más datos
-
-    setState(() {
-      isLoadingMore = true;
-    });
-
-    final newPage = currentPage + 1;
-    try {
-      setState(() {
-        currentPage = newPage;
-      });
-    } catch (error) {
-      print('Error al cargar más datos: $error');
-    } finally {
-      setState(() {
-        isLoadingMore = false;
-      });
-    }
-  }
-
-  // // Usar fetchMore para cargar más datos de la consulta GraphQL
-  // Future<List<Map<String, dynamic>>> _fetchMoreData(int page) async {
-  //   final QueryOptions options = QueryOptions(
-  //     document: gql(getPokemonListQuery), // Tu consulta GraphQL
-  //     variables: {
-  //       'offset': page * itemsPerPage, // Calcula el nuevo offset
-  //       'limit': itemsPerPage, // Mantén el límite de la página
-  //     },
-  //   );
-  //
-  //   // Usamos el fetchMore dentro del Query Widget en el builder
-  //   final result = await fetchMore(options);
-  //
-  //   if (result.hasException) {
-  //     throw result.exception!;
-  //   }
-  //
-  //   final List<Map<String, dynamic>> newPokedex = (result.data?['pokemon_v2_pokemon'] as List<dynamic>)
-  //       .cast<Map<String, dynamic>>();
-  //
-  //   return newPokedex;
-  // }
 
   @override
   void dispose() {
@@ -246,6 +186,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   selectedSortOrder = value;
                 });
               },
+              onSearchQueryChanged: (query){
+                setState(() {
+                  searchQuery = query.trim().toLowerCase();
+                });
+              }
             ),
           ),
           const SizedBox(height: 10),
@@ -253,31 +198,13 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             child: Query(
               options: QueryOptions(
                 document: gql(getPokemonListQuery),
-                variables: {
-                  'offset': currentPage * itemsPerPage,
-                  'limit': itemsPerPage,
-                },
               ),
               builder: (QueryResult result, {fetchMore, refetch}) {
-                if (result.isLoading && paginatedPokedex.isEmpty) {
+                if (result.isLoading) {
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (result.hasException) {
                   return Center(child: Text('Error al cargar datos: ${result.exception.toString()}'));
-                }
-
-                // Si se obtienen nuevos datos, actualiza `paginatedPokedex`
-                if (result.data != null) {
-                  final newPokedex = (result.data?['pokemon_v2_pokemon'] as List<dynamic>)
-                      .cast<Map<String, dynamic>>();
-
-                  paginatedPokedex = [
-                    ...paginatedPokedex,
-                    ...newPokedex.where((newPokemon) =>
-                    !paginatedPokedex.any((existingPokemon) =>
-                    existingPokemon['id'] == newPokemon['id'])),
-                  ];
-
                 }
 
                 final pokedex = (result.data?['pokemon_v2_pokemon'] as List?)
@@ -285,10 +212,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     [];
 
                 final displayedPokedex = showFavoritesOnly
-                    ? paginatedPokedex.where((pokemon) => favoritePokemonIds.contains(pokemon['id'])).toList()
-                    : paginatedPokedex;
+                    ? pokedex.where((pokemon) => favoritePokemonIds.contains(pokemon['id'])).toList()
+                    : pokedex;
 
                 final filteredPokedex = displayedPokedex.where((pokemon) {
+                  if (showFavoritesOnly) {
+                    return favoritePokemonIds.contains(pokemon['id']);
+                  }
+
                   final types = (pokemon['pokemon_v2_pokemontypes'] as List?)
                       ?.map((typeData) =>
                       (typeData['pokemon_v2_type']['name'] as String).toLowerCase())
@@ -313,16 +244,18 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   final matchesAbility =
                       selectedAbility == null || abilities.contains(selectedAbility);
                   final matchesSearch = searchQuery.isEmpty ||
-                      name.contains(searchQuery) ||
+                      pokemon['name'].toLowerCase().contains(searchQuery) ||
                       pokemon['id'].toString() == searchQuery;
 
-                  // Nueva condición: verificar si el poder está dentro del rango seleccionado
                   final matchesPower = (minPower == null || power >= minPower!) &&
                       (maxPower == null || power <= maxPower!);
 
-                  return matchesType && matchesGeneration && matchesAbility && matchesPower && matchesSearch;
+                  return matchesType &&
+                      matchesGeneration &&
+                      matchesAbility &&
+                      matchesPower &&
+                      matchesSearch;
                 }).toList();
-
                 // Aplicar ordenación
                 if (selectedSortOrder != null) {
                   if (selectedSortOrder == 'name') {
@@ -372,9 +305,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   }
                 }
 
-                return Stack(
-                  children: [
-                  GridView.builder(
+
+                return GridView.builder(
                   controller: _scrollController,
                   padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -383,36 +315,15 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     mainAxisSpacing: 10,
                     crossAxisSpacing: 10,
                   ),
-                  itemCount: filteredPokedex.length + (isLoadingMore ? 1 : 0),
+                  itemCount: filteredPokedex.length,
                   itemBuilder: (context, index) {
-                    if (index == filteredPokedex.length) {
-                      fetchMore!(
-                        FetchMoreOptions(
-                          variables: {
-                            'offset': (currentPage + 1) * itemsPerPage,
-                            'limit': itemsPerPage,
-                          },
-                          updateQuery: (previousResultData, fetchMoreResultData) {
-                            // Combine los datos previos y los nuevos
-                            final List<Map<String, dynamic>> updatedPokedex = [
-                              ...previousResultData?['pokemon_v2_pokemon'] as List,
-                              ...fetchMoreResultData?['pokemon_v2_pokemon'] as List,
-                            ];
-                            return {
-                              'pokemon_v2_pokemon': updatedPokedex,
-                            };
-                          },
-                        ),
-                      );
-                      return Center(child: CircularProgressIndicator());
-                    }
-
                     final pokemon = filteredPokedex[index];
                     final pokemonId = pokemon['id'];
                     final isFavorite = favoritePokemonIds.contains(pokemonId);
 
                     final types = (pokemon['pokemon_v2_pokemontypes'] as List?)
-                        ?.map((typeData) => typeData['pokemon_v2_type']['name'] as String)
+                        ?.map((typeData) =>
+                    typeData['pokemon_v2_type']['name'] as String)
                         .toList() ??
                         ['Unknown'];
 
@@ -429,7 +340,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                               filteredPokedex: filteredPokedex,
                               currentIndex: index,
                               favoritePokemonIds: favoritePokemonIds,
-                              onFavoriteToggle: (pokemonId) { // callback
+                              onFavoriteToggle: (pokemonId) {
                                 setState(() {
                                   if (favoritePokemonIds.contains(pokemonId)) {
                                     favoritePokemonIds.remove(pokemonId);
@@ -437,12 +348,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                     favoritePokemonIds.add(pokemonId);
                                   }
                                 });
-                                _saveFavorites(); // guardar los favoritos actualizados
+                                _saveFavorites();
                               },
                             ),
                           ),
                         );
-
                       },
                       child: Container(
                         decoration: BoxDecoration(
@@ -524,22 +434,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                 ),
                               ),
                             ),
-                            if (isLoadingMore)
-                              Positioned(
-                                bottom: 10,
-                                left: 0,
-                                right: 0,
-                                child: Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              ),
                           ],
                         ),
                       ),
                     );
                   },
-                ),
-                ],
                 );
               },
             ),

@@ -17,6 +17,8 @@ class FiltersSection extends StatelessWidget {
   final void Function(RangeValues) onPowerRangeChanged;
   final String? selectedSortOrder;
   final void Function(String?) onSortOrderChanged;
+  final void Function(String) onSearchQueryChanged; // NUEVO
+
 
   const FiltersSection({
     super.key,
@@ -35,6 +37,7 @@ class FiltersSection extends StatelessWidget {
     required this.onPowerRangeChanged,
     required this.selectedSortOrder,
     required this.onSortOrderChanged,
+    required this.onSearchQueryChanged,
   });
 
   @override
@@ -55,12 +58,8 @@ class FiltersSection extends StatelessWidget {
             ),
           ),
           style: const TextStyle(color: Colors.white),
-          onChanged: (value) {
-            // Validar que el tipo ingresado existe en la lista antes de asignarlo
-            final lowerCasedValue = value.toLowerCase();
-            final isValidType = types.map((t) => t.toLowerCase()).contains(lowerCasedValue);
-            onTypeChanged(isValidType ? lowerCasedValue : null);
-          },        ),
+          onChanged: onSearchQueryChanged, // Ahora envía directamente la búsqueda.
+        ),
         const SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
