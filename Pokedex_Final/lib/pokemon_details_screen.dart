@@ -306,8 +306,66 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                       ),
                     ),
                     //falta poner el carrusel
-                  ],
+                    // Lista de Pokémon (barra horizontal)
+                    const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Text(
+                        "All Pokémon",
+                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                      ),
+                    ),
+                    SizedBox(
+                      height: 120,
+                      child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: widget.fullPokedex.length, // Lista completa de Pokémon
+                    itemBuilder: (context, index) {
+                      final otherPokemon = widget.fullPokedex[index];
+                      final otherImageUrl = (otherPokemon['pokemon_v2_pokemonsprites'].isNotEmpty &&
+                          otherPokemon['pokemon_v2_pokemonsprites'][0]['sprites'] != null)
+                          ? otherPokemon['pokemon_v2_pokemonsprites'][0]['sprites']['front_default']
+                          : '';
+
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => PokemonDetailScreen(
+                                fullPokedex: widget.fullPokedex,
+                                filteredPokedex: widget.filteredPokedex,
+                                currentIndex: index,
+                                favoritePokemonIds: widget.favoritePokemonIds,
+                                onFavoriteToggle: widget.onFavoriteToggle,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Column(
+                            children: [
+                              CachedNetworkImage(
+                                imageUrl: otherImageUrl,
+                                height: 80,
+                                fit: BoxFit.cover,
+                                errorWidget: (context, url, error) => const Icon(Icons.error, color: Colors.red),
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                otherPokemon['name'].toString().toUpperCase(),
+                                style: const TextStyle(color: Colors.white, fontSize: 12),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
+                ],
+              ),
               ),
             ],
           ),
