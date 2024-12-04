@@ -419,6 +419,13 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
               color: Colors.white,
               fontSize: 24,
               fontWeight: FontWeight.bold,
+              shadows: [
+                Shadow(
+                  offset: Offset(1.5, 1.5), // Desplazamiento
+                  blurRadius: 2.0, // Desenfoque
+                  color: Colors.black, // Color de la sombra
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 8),
@@ -437,14 +444,34 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
           Text(
             "Type: ${pokemonDetail['pokemon_v2_pokemontypes'].map((type) => type['pokemon_v2_type']['name']).join(', ')}",
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white, fontSize: 16),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              shadows: [
+                Shadow(
+                  offset: Offset(1.0, 1.0),
+                  blurRadius: 2.0,
+                  color: Colors.black,
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 8),
           // Habilidades del Pokémon
           Text(
             "Abilities: ${pokemonDetail['pokemon_v2_pokemonabilities'].map((ability) => ability['pokemon_v2_ability']['name']).join(', ')}",
             textAlign: TextAlign.center,
-            style: const TextStyle(color: Colors.white, fontSize: 16),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              shadows: [
+                Shadow(
+                  offset: Offset(1.0, 1.0),
+                  blurRadius: 2.0,
+                  color: Colors.black,
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 8),
           // Estadísticas del Pokémon
@@ -456,7 +483,17 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                   padding: const EdgeInsets.symmetric(vertical: 2.0),
                   child: Text(
                     "${stat['pokemon_v2_stat']['name'].toString().toUpperCase()}: ${stat['base_stat']}",
-                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                      shadows: [
+                        Shadow(
+                          offset: Offset(0.8, 0.8),
+                          blurRadius: 1.5,
+                          color: Colors.black,
+                        ),
+                      ],
+                    ),
                   ),
                 );
               }).toList(),
@@ -466,6 +503,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
       ),
     );
   }
+
 
   final GlobalKey _shareKey = GlobalKey();
 
