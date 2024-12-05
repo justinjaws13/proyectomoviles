@@ -30,6 +30,7 @@ class PokemonDetailScreen extends StatefulWidget {
 class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
   late int currentIndex;
   late bool isFavorite;
+  bool _isSharingCardVisible = false; // Control de visibilidad
 
   @override
   void initState() {
@@ -67,8 +68,20 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
 
   Future<void> _sharePokemonDetails() async {
     try {
+      // Hacer visible el widget
+      setState(() {
+        _isSharingCardVisible = true;
+      });
+      // Esperar un frame para que la UI se actualice
+      await Future.delayed(const Duration(milliseconds: 100));
+
+      // Capturar la tarjeta
       final imageBytes = await _capturePokemonCard();
 
+      // Ocultar el widget después de la captura
+      setState(() {
+        _isSharingCardVisible = false;
+      });
       await Share.shareXFiles(
         [
           XFile.fromData(
@@ -177,9 +190,13 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                   ],
                 ),
               ),
-              RepaintBoundary(
-                key: _shareKey,
-                child: _buildPokemonCardForSharing(pokemonDetail, typeColors),
+              // Widget oculto para compartir
+              Visibility(
+                visible: _isSharingCardVisible, // Controlado por _isSharingCardVisible
+                child: RepaintBoundary(
+                  key: _shareKey,
+                  child: _buildPokemonCardForSharing(pokemonDetail, typeColors),
+                ),
               ),
               // Animación de la imagen principal
               AnimatedContainer(
