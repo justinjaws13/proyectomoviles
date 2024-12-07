@@ -91,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     _animationController.dispose();
     super.dispose();
   }
-
+//cargar los favoritos
   void _loadFavorites() async {
     try {
       final prefs = await SharedPreferences.getInstance();
