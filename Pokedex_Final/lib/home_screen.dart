@@ -41,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   String? selectedAbility;
   String? selectedSortOrder;
   String searchQuery = "";
-  Set<int> favoritePokemonIds = {};
+  Set<String> favoritePokemonIds = {};
   bool showFavoritesOnly = false;
   late AnimationController _animationController;
   final ScrollController _scrollController = ScrollController();
@@ -51,29 +51,26 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   int? maxPower = 800;
   RangeValues powerRange = const RangeValues(0, 800);
 
-  final List<String> types = [
-    'All', 'Grass', 'Fire', 'Water', 'Electric', 'Rock', 'Ground', 'Psychic',
-    'Fighting', 'Bug', 'Ghost', 'Normal', 'Poison', 'Ice', 'Dragon', 'Dark',
-    'Fairy', 'Steel', 'Flying'
-  ];
-  final List<int?> generations = [null, 1, 2, 3, 4, 5, 6, 7, 8];
-
-  final List<String> abilities = [
-    'All', 'Overgrow', 'Blaze', 'Torrent', 'Static', 'Poison Point', 'Swift Swim',
-    'Intimidate', 'Levitate', 'Chlorophyll', 'Guts', 'Keen Eye', 'Sturdy', 'Inner Focus',
-    'Compound Eyes', 'Sand Stream', 'Pressure', 'Synchronize', 'Thick Fat', 'Immunity',
-    'Flash Fire', 'Flame Body', 'Water Absorb', 'Volt Absorb', 'Cute Charm', 'Shell Armor',
-    'Natural Cure', 'Run Away', 'Pickup', 'Early Bird', 'Truant', 'Hustle', 'Marvel Scale',
-    'Battle Armor', 'Hyper Cutter', 'Soundproof', 'Effect Spore', 'Arena Trap',
-    'Vital Spirit', 'Rain Dish', 'Speed Boost', 'Magic Guard', 'Filter', 'Iron Barbs',
-    'Adaptability', 'Sheer Force', 'Mold Breaker', 'Prankster', 'Rough Skin', 'Lightning Rod',
-    'Unburden', 'Technician', 'Mega Launcher', 'Contrary', 'Bulletproof', 'Strong Jaw',
-    'Protean', 'Drought', 'Defiant', 'Victory Star', 'Snow Warning', 'Solar Power', 'Steadfast',
-    'No Guard', 'Reckless', 'Multiscale', 'Magic Bounce', 'Pixilate', 'Parental Bond',
-    'Dark Aura', 'Fairy Aura', 'Aura Break', 'Shadow Shield',
-  ];
-
-  final List<String> sortOptions = ['Number', 'Name', 'Power', 'Type', 'Abilities'];
+  final Map<String, Color> typeColors = {
+    'grass': Colors.greenAccent,
+    'fire': Colors.redAccent,
+    'water': Colors.blue,
+    'electric': Colors.yellowAccent,
+    'rock': Colors.grey,
+    'ground': Colors.brown,
+    'psychic': Colors.purpleAccent,
+    'fighting': Colors.orangeAccent,
+    'bug': Colors.lightGreenAccent,
+    'ghost': Colors.deepPurple,
+    'normal': Colors.black26,
+    'poison': Colors.deepPurpleAccent,
+    'ice': Colors.lightBlueAccent,
+    'dark': Colors.black87,
+    'steel': Colors.blueGrey,
+    'fairy': Colors.pinkAccent,
+    'dragon': Colors.indigoAccent,
+    'flying': Colors.cyan,
+  };
 
   @override
   void initState() {
@@ -97,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
       final prefs = await SharedPreferences.getInstance();
       final favoriteIds = prefs.getStringList('favoritePokemonIds') ?? [];
       setState(() {
-        favoritePokemonIds = favoriteIds.map((id) => int.parse(id)).toSet();
+        favoritePokemonIds = favoriteIds.toSet();
       });
     } catch (e) {
       print("Error al cargar favoritos: $e");
@@ -106,8 +103,23 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
 
   void _saveFavorites() async {
     final prefs = await SharedPreferences.getInstance();
-    final favoriteIds = favoritePokemonIds.map((id) => id.toString()).toList();
-    prefs.setStringList('favoritePokemonIds', favoriteIds);
+    prefs.setStringList('favoritePokemonIds', favoritePokemonIds.toList());
+  }
+
+  void _toggleFavorite(String pokemonId) {
+    setState(() {
+      if (favoritePokemonIds.contains(pokemonId)) {
+        favoritePokemonIds.remove(pokemonId);
+      } else {
+        favoritePokemonIds.add(pokemonId);
+      }
+    });
+    _saveFavorites();
+  }
+
+  /// Función para obtener el color según el tipo del Pokémon
+  Color _getTypeColor(String type) {
+    return typeColors[type.toLowerCase()] ?? Colors.grey;
   }
 
   @override
@@ -134,12 +146,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             icon: Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: Colors.red.withOpacity(0.2), // Fondo semitransparente rojo
+                color: Colors.red.withOpacity(0.2),
               ),
               padding: const EdgeInsets.all(8),
               child: Icon(
                 showFavoritesOnly ? Icons.star : Icons.star_border,
-                color: Colors.yellow, // Color del corazón
+                color: Colors.yellow,
                 size: 28,
               ),
             ),
@@ -150,7 +162,6 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
             },
           ),
         ],
-
       ),
       body: Column(
         children: [
@@ -158,15 +169,34 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
             child: FiltersSection(
-              types: types,
+              types: const [
+                'All', 'Grass', 'Fire', 'Water', 'Electric', 'Rock', 'Ground', 'Psychic',
+                'Fighting', 'Bug', 'Ghost', 'Normal', 'Poison', 'Ice', 'Dragon', 'Dark',
+                'Fairy', 'Steel', 'Flying'
+              ],
               typeIcons: _typeIcons,
-              generations: generations,
-              abilities: abilities,
-              sortOptions: sortOptions,
+              generations: const [null, 1, 2, 3, 4, 5, 6, 7, 8],
+              abilities: const [
+                'All', 'Overgrow', 'Blaze', 'Torrent', 'Static', 'Poison Point', 'Swift Swim',
+                'Intimidate', 'Levitate', 'Chlorophyll', 'Guts', 'Keen Eye', 'Sturdy',
+                'Inner Focus', 'Compound Eyes', 'Sand Stream', 'Pressure', 'Synchronize',
+                'Thick Fat', 'Immunity', 'Flash Fire', 'Flame Body', 'Water Absorb',
+                'Volt Absorb', 'Cute Charm', 'Shell Armor', 'Natural Cure', 'Run Away',
+                'Pickup', 'Early Bird', 'Truant', 'Hustle', 'Marvel Scale', 'Battle Armor',
+                'Hyper Cutter', 'Soundproof', 'Effect Spore', 'Arena Trap', 'Vital Spirit',
+                'Rain Dish', 'Speed Boost', 'Magic Guard', 'Filter', 'Iron Barbs',
+                'Adaptability', 'Sheer Force', 'Mold Breaker', 'Prankster', 'Rough Skin',
+                'Lightning Rod', 'Unburden', 'Technician', 'Mega Launcher', 'Contrary',
+                'Bulletproof', 'Strong Jaw', 'Protean', 'Drought', 'Defiant', 'Victory Star',
+                'Snow Warning', 'Solar Power', 'Steadfast', 'No Guard', 'Reckless',
+                'Multiscale', 'Magic Bounce', 'Pixilate', 'Parental Bond', 'Dark Aura',
+                'Fairy Aura', 'Aura Break', 'Shadow Shield',
+              ],
+              sortOptions: const ['Number', 'Name', 'Power', 'Type', 'Abilities'],
               selectedType: selectedType,
               onTypeChanged: (value) {
                 setState(() {
-                  selectedType = value == 'all' ? null : value;
+                  selectedType = value == 'All' ? null : value?.toLowerCase();
                 });
               },
               selectedGeneration: selectedGeneration,
@@ -195,11 +225,11 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   selectedSortOrder = value;
                 });
               },
-              onSearchQueryChanged: (query){
+              onSearchQueryChanged: (query) {
                 setState(() {
                   searchQuery = query.trim().toLowerCase();
                 });
-              }
+              },
             ),
           ),
           const SizedBox(height: 10),
@@ -213,7 +243,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                   return const Center(child: CircularProgressIndicator());
                 }
                 if (result.hasException) {
-                  return Center(child: Text('Error al cargar datos: ${result.exception.toString()}'));
+                  return Center(
+                    child: Text(
+                      'Error al cargar datos: ${result.exception.toString()}',
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  );
                 }
 
                 final pokedex = (result.data?['pokemon_v2_pokemon'] as List?)
@@ -221,99 +256,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     [];
 
                 final displayedPokedex = showFavoritesOnly
-                    ? pokedex.where((pokemon) => favoritePokemonIds.contains(pokemon['id'])).toList()
+                    ? pokedex.where((pokemon) => favoritePokemonIds.contains(pokemon['id'].toString())).toList()
                     : pokedex;
-
-                final filteredPokedex = displayedPokedex.where((pokemon) {
-                  if (showFavoritesOnly) {
-                    return favoritePokemonIds.contains(pokemon['id']);
-                  }
-
-                  final types = (pokemon['pokemon_v2_pokemontypes'] as List?)
-                      ?.map((typeData) =>
-                      (typeData['pokemon_v2_type']['name'] as String).toLowerCase())
-                      .toList() ??
-                      [];
-                  final generation = pokemon['pokemon_v2_pokemonspecy']?['generation_id'];
-
-                  final abilities = (pokemon['pokemon_v2_pokemonabilities'] as List?)
-                      ?.map((abilityData) =>
-                  abilityData['pokemon_v2_ability']['name'] as String)
-                      .toList() ??
-                      [];
-
-                  final power = ((pokemon['pokemon_v2_pokemonstats'] as List?) ?? [])
-                      .fold<int>(0, (sum, stat) => sum + ((stat['base_stat'] ?? 0) as int));
-
-                  final name = (pokemon['name'] as String).toLowerCase();
-
-                  final matchesType = selectedType == null || types.contains(selectedType);
-                  final matchesGeneration =
-                      selectedGeneration == null || generation == selectedGeneration;
-                  final matchesAbility =
-                      selectedAbility == null || abilities.contains(selectedAbility);
-                  final matchesSearch = searchQuery.isEmpty ||
-                      pokemon['name'].toLowerCase().contains(searchQuery) ||
-                      pokemon['id'].toString() == searchQuery;
-
-                  final matchesPower = (minPower == null || power >= minPower!) &&
-                      (maxPower == null || power <= maxPower!);
-
-                  return matchesType &&
-                      matchesGeneration &&
-                      matchesAbility &&
-                      matchesPower &&
-                      matchesSearch;
-                }).toList();
-                // Aplicar ordenación
-                if (selectedSortOrder != null) {
-                  if (selectedSortOrder == 'name') {
-                    filteredPokedex.sort((a, b) =>
-                        (a['name'] as String).compareTo(b['name'] as String));
-                  } else if (selectedSortOrder == 'number') {
-                    filteredPokedex.sort((a, b) =>
-                        (a['id'] as int).compareTo(b['id'] as int));
-                  } else if (selectedSortOrder == 'power') {
-                    filteredPokedex.sort((a, b) {
-                      final powerA = ((a['pokemon_v2_pokemonstats'] as List?) ?? [])
-                          .fold<int>(0, (sum, stat) => sum + ((stat['base_stat'] ?? 0) as int));
-                      final powerB = ((b['pokemon_v2_pokemonstats'] as List?) ?? [])
-                          .fold<int>(0, (sum, stat) => sum + ((stat['base_stat'] ?? 0) as int));
-                      return powerB.compareTo(powerA);
-                    });
-                  } else if (selectedSortOrder == 'type') {
-                    filteredPokedex.sort((a, b) {
-                      final typesA = (a['pokemon_v2_pokemontypes'] as List?)
-                          ?.map((typeData) => typeData['pokemon_v2_type']['name'] as String)
-                          .toList() ??
-                          [];
-                      final typesB = (b['pokemon_v2_pokemontypes'] as List?)
-                          ?.map((typeData) => typeData['pokemon_v2_type']['name'] as String)
-                          .toList() ??
-                          [];
-                      final firstTypeA = typesA.isNotEmpty ? typesA.first : '';
-                      final firstTypeB = typesB.isNotEmpty ? typesB.first : '';
-                      return firstTypeA.compareTo(firstTypeB);
-                    });
-                  } else if (selectedSortOrder == 'ability') {
-                    filteredPokedex.sort((a, b) {
-                      final abilitiesA = (a['pokemon_v2_pokemonabilities'] as List?)
-                          ?.map((abilityData) =>
-                      abilityData['pokemon_v2_ability']['name'] as String)
-                          .toList() ??
-                          [];
-                      final abilitiesB = (b['pokemon_v2_pokemonabilities'] as List?)
-                          ?.map((abilityData) =>
-                      abilityData['pokemon_v2_ability']['name'] as String)
-                          .toList() ??
-                          [];
-                      final firstAbilityA = abilitiesA.isNotEmpty ? abilitiesA.first : '';
-                      final firstAbilityB = abilitiesB.isNotEmpty ? abilitiesB.first : '';
-                      return firstAbilityA.compareTo(firstAbilityB);
-                    });
-                  }
-                }
-
 
                 return GridView.builder(
                   controller: _scrollController,
@@ -324,20 +268,16 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                     mainAxisSpacing: 10,
                     crossAxisSpacing: 10,
                   ),
-                  itemCount: filteredPokedex.length,
+                  itemCount: displayedPokedex.length,
                   itemBuilder: (context, index) {
-                    final pokemon = filteredPokedex[index];
-                    final pokemonId = pokemon['id'];
+                    final pokemon = displayedPokedex[index];
+                    final pokemonId = pokemon['id'].toString();
                     final isFavorite = favoritePokemonIds.contains(pokemonId);
-
                     final types = (pokemon['pokemon_v2_pokemontypes'] as List?)
-                        ?.map((typeData) =>
-                    typeData['pokemon_v2_type']['name'] as String)
+                        ?.map((typeData) => typeData['pokemon_v2_type']['name'] as String)
                         .toList() ??
                         ['Unknown'];
-
-                    final spriteData = pokemon['pokemon_v2_pokemonsprites']?.first['sprites'];
-                    final imageUrl = spriteData != null ? spriteData['front_default'] : null;
+                    final mainType = types.isNotEmpty ? types.first.toLowerCase() : 'unknown';
 
                     return GestureDetector(
                       onTap: () {
@@ -346,21 +286,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                           MaterialPageRoute(
                             builder: (_) => PokemonDetailScreen(
                               fullPokedex: pokedex,
-                              filteredPokedex: filteredPokedex,
+                              filteredPokedex: displayedPokedex,
                               currentIndex: index,
-                              favoritePokemonIds: favoritePokemonIds,
-                              onFavoriteToggle: (pokemonId) {
-                                setState(() {
-
-                                  // id=pokemonId.toString()
-                                  if (favoritePokemonIds.contains(pokemonId)) {
-                                    favoritePokemonIds.remove(pokemonId);
-                                  } else {
-                                    favoritePokemonIds.add(pokemonId);
-                                  }
-                                });
-                                _saveFavorites();
-                              },
+                              favoritePokemonIds: favoritePokemonIds.map(int.parse).toSet(),
+                              onFavoriteToggle: (id) => _toggleFavorite(id.toString()),
                             ),
                           ),
                         );
@@ -369,8 +298,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             colors: [
-                              _getTypeColor(types.first).withOpacity(0.8),
-                              _getTypeColor(types.first).withOpacity(0.4),
+                              _getTypeColor(mainType).withOpacity(0.8),
+                              _getTypeColor(mainType).withOpacity(0.4),
                             ],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
@@ -395,30 +324,14 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 10, bottom: 5),
-                                  child: Row(
-                                    children: types.map((type) {
-                                      return Icon(
-                                        _typeIcons[type.toLowerCase()] ?? Icons.help,
-                                        color: Colors.white,
-                                        size: 18,
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
                                 Expanded(
                                   child: Center(
-                                    child: imageUrl != null
-                                        ? CachedNetworkImage(
-                                      imageUrl: imageUrl,
+                                    child: CachedNetworkImage(
+                                      imageUrl: pokemon['pokemon_v2_pokemonsprites']
+                                          ?.first['sprites']['front_default'] ??
+                                          'https://via.placeholder.com/150',
                                       height: 170,
                                       fit: BoxFit.contain,
-                                    )
-                                        : const Icon(
-                                      Icons.image_not_supported,
-                                      color: Colors.white,
-                                      size: 100,
                                     ),
                                   ),
                                 ),
@@ -428,16 +341,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
                               top: 10,
                               right: 10,
                               child: GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    if (isFavorite) {
-                                      favoritePokemonIds.remove(pokemonId);
-                                    } else {
-                                      favoritePokemonIds.add(pokemonId);
-                                    }
-                                  });
-                                  _saveFavorites();
-                                },
+                                onTap: () => _toggleFavorite(pokemonId),
                                 child: Icon(
                                   isFavorite ? Icons.star : Icons.star_border,
                                   color: isFavorite ? Colors.yellow : Colors.white,
@@ -457,42 +361,5 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
         ],
       ),
     );
-  }
-
-  Color _getTypeColor(String type) {
-    switch (type) {
-      case 'grass':
-        return Colors.greenAccent;
-      case 'fire':
-        return Colors.redAccent;
-      case 'water':
-        return Colors.blue;
-      case 'electric':
-        return Colors.yellowAccent;
-      case 'rock':
-        return Colors.grey;
-      case 'ground':
-        return Colors.brown;
-      case 'psychic':
-        return Colors.indigo;
-      case 'fighting':
-        return Colors.orangeAccent;
-      case 'bug':
-        return Colors.lightGreenAccent;
-      case 'ghost':
-        return Colors.deepPurple;
-      case 'normal':
-        return Colors.black26;
-      case 'poison':
-        return Colors.deepPurpleAccent;
-      case 'ice':
-        return Colors.lightBlueAccent;
-      case 'dark':
-        return Colors.black87;
-      case 'steel':
-        return Colors.blueGrey;
-      default:
-        return Colors.pinkAccent;
-    }
   }
 }
